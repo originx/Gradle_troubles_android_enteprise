@@ -1,0 +1,226 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+      jcenter()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'com.google.gms:google-services:3.0.0'
+        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
+        classpath 'io.fabric.tools:gradle:1.21.5'
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.2.1'
+        classpath 'me.tatarka:gradle-retrolambda:3.2.4'
+        // workaround for <https://github.com/evant/gradle-retrolambda/issues/96>
+        classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
+        // keep out until https://github.com/android10/frodo/issues/9 is fixed
+        classpath 'com.fernandocejas.frodo:frodo-plugin:0.8.2'
+        //instrumentation paralelization runner
+        classpath 'com.stanfy.spoon:spoon-gradle-plugin:1.2.2'
+        classpath 'com.squareup.spoon:spoon-runner:1.7.0'
+    }
+    // use our modified version above.
+    configurations.classpath.exclude group: 'com.android.tools.external.lombok'
+    configurations {
+        androidTestCompile.exclude group: 'com.android.support', module: 'support-v4'
+    }
+}
+
+//fixme libs - the debug screens use the VERSION_NAME and VERSION_CODE data from their
+// BuildConfig, not the app's one, so right now we need this setup and have to refactor these informational
+// screens as well
+//
+//
+// The current app's version code uses a different versioncode scheme and is currently ~1,5 * 10^8,
+// but currently only raises the patch part. So to make our app an "upgrade" with the new numbering scheme,
+// we should at least start with appVersionMajor = 3 (~2,0 * 10^8)
+ext.appVersionMajorDE = 5 // at most 15
+ext.appVersionMinorDE = 3 // at most 63
+ext.appVersionPatchDE = 0 // at most 127
+ext.appVersionBuildDE = 0 // at most 16383
+
+ext.appVersionMajorIT = 2 // at most 15
+ext.appVersionMinorIT = 2 // at most 63
+ext.appVersionPatchIT = 0 // at most 127
+ext.appVersionBuildIT = 0 // at most 16383
+
+ext.appVersionMajorMX = 3 // at most 15
+ext.appVersionMinorMX = 2 // at most 63
+ext.appVersionPatchMX = 0 // at most 127
+ext.appVersionBuildMX = 0 // at most 16383
+
+
+ext.appVersionMajorUS = 1 // at most 15
+ext.appVersionMinorUS = 0 // at most 63
+ext.appVersionPatchUS = 0 // at most 127
+ext.appVersionBuildUS = 0 // at most 16383
+
+
+// we have 31 bits (unsigned) available, so that leaves us with
+// 2^4 for versionMajor (0-15),
+// 2^6 for versionMinor (0-63),
+// 2^7 for versionPatch (0-127) and the remaining bits (2^14) for
+// versionBuild (0-16383)
+ext.appVersionCodeDE = getVersionCode(ext.appVersionMajorDE, ext.appVersionMinorDE, ext.appVersionPatchDE, ext.appVersionBuildDE)
+ext.appVersionNameDE = getVersionName(ext.appVersionMajorDE, ext.appVersionMinorDE, ext.appVersionPatchDE)
+
+ext.appVersionCodeIT = getVersionCode(ext.appVersionMajorIT, ext.appVersionMinorIT, ext.appVersionPatchIT, ext.appVersionBuildIT)
+ext.appVersionNameIT = getVersionName(ext.appVersionMajorIT, ext.appVersionMinorIT, ext.appVersionPatchIT)
+
+ext.appVersionCodeMX = getVersionCode(ext.appVersionMajorMX, ext.appVersionMinorMX, ext.appVersionPatchMX, ext.appVersionBuildMX)
+ext.appVersionNameMX = getVersionName(ext.appVersionMajorMX, ext.appVersionMinorMX, ext.appVersionPatchMX)
+
+ext.appVersionCodeUS = getVersionCode(ext.appVersionMajorUS, ext.appVersionMinorUS, ext.appVersionPatchUS, ext.appVersionBuildUS)
+ext.appVersionNameUS = getVersionName(ext.appVersionMajorUS, ext.appVersionMinorUS, ext.appVersionPatchUS)
+
+ext.revision = getSvnRevision()
+if(ext.revision==0){ //if current directory is not a working svn directory
+    ext.revision = getGitRevision();
+}
+
+println "Revision ${ext.revision}"
+
+ext.buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
+ext.isJenkins = System.getenv("JENKINS_HOME") != null
+ext.preDexEnabled = "true".equals(System.getProperty("pre-dex", "true")) && !ext.isJenkins
+
+// a couple of settings that speed up local debug builds
+ext.debugOptimizations = project.hasProperty("debugOptimizations") ? ext.debugOptimizations.toBoolean() : true
+ext.debugMinifyEnabled = ext.isJenkins || !ext.debugOptimizations
+ext.debugShrinkResourcesEnabled = ext.isJenkins || !ext.debugOptimizations
+ext.debugTestCoverageEnabled = ext.isJenkins || !ext.debugOptimizations
+
+// override this with -PisProduction=true to create publishable release builds
+ext.isProduction = project.hasProperty("isProduction") ? ext.isProduction.toBoolean() : false
+// override this with -PisBeta=true to enable debug screen in production build without enviroment switcher
+ext.isBeta = project.hasProperty("isBeta") ? ext.isBeta.toBoolean() : false
+// override this with -PisProximityActivated=true to create publishable release builds
+ext.isProximityActivated = project.hasProperty("isProximityActivated") ? ext.isProximityActivated.toBoolean() : true  //for releases without proximity change this default value to false
+
+allprojects {
+    // prevent evil gradle children fork proceses spawns from stealing focus
+    tasks.withType(JavaForkOptions) {
+        // Forked processes like GradleWorkerMain for tests won't steal focus!
+        jvmArgs '-Djava.awt.headless=true'
+    }
+
+    repositories {
+
+        jcenter()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    apply plugin: 'idea'
+
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }
+}
+
+
+subprojects {
+    tasks.withType(Test).all {
+        ignoreFailures isJenkins
+        systemProperty "run-under-test", "true"
+    }
+}
+
+
+def getSvnRevision() {
+    new ByteArrayOutputStream().withStream { os ->
+        ext.svnRev = 0
+
+        try{
+            //noinspection GroovyUnusedAssignment
+            def result = exec {
+                executable = 'svn'
+                args = ['info']
+                standardOutput = os
+            }
+        }catch (Exception e){
+        }
+        def outputAsString = os.toString()
+        def matchLastChangedRev = outputAsString =~ /Last Changed Rev: (\d+)/
+        try {
+            ext.svnRev = "${matchLastChangedRev[0][1]}".toInteger()
+        } catch (IndexOutOfBoundsException ignored) {
+            //Do nothing, fix for svn locale other than EN
+        }
+    }
+    return svnRev
+}
+
+def getGitRevision(){
+    try{
+        def gitFolder = "$projectDir/.git/"
+        def takeFromHash = 12
+        /*
+         * '.git/HEAD' contains either
+         *      in case of detached head: the currently checked out commit hash
+         *      otherwise: a reference to a file containing the current commit hash
+         */
+        def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
+        def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
+        // def isRef = head.length > 1     // ref: refs/heads/master
+
+        if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+
+        def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
+        refHead.text.trim().take takeFromHash
+    }catch (Exception e){
+    }
+}
+
+def getVersionCode(appVersionMajor, appVersionMinor, appVersionPatch, appVersionBuild) {
+    return appVersionMajor << 27 | appVersionMinor << 21 | appVersionPatch << 14 | appVersionBuild;
+}
+
+def getVersionName(appVersionMajor, appVersionMinor, appVersionPatch) {
+    return "${appVersionMajor}.${appVersionMinor}.${appVersionPatch}";
+}
+
+// this is needed until this is implemented: https://jira.sonarsource.com/browse/SONAR-4101
+task combineTestResultsForSonarqube {
+    group = "Reporting"
+    description = "Copies test results from integration and unit tests into one specific directory where Sonarqube can pick them up."
+
+    def flavorsWithTests = [
+            "app" : ["payGermanyCompat"],
+            "core": ["germany"],
+            "pay" : ["germany"]
+    ];
+    def modules = flavorsWithTests.keySet()
+    doLast {
+        modules.each { module ->
+            File combined = file("${module}/build/combined-test-results")
+            if (combined.exists()) {
+                combined.deleteDir()
+            }
+            combined.mkdirs();
+            flavorsWithTests[module].each { flavor ->
+                def testDirs = [file("${module}/build/test-results/${flavor}Debug/"),
+                                file("${module}/build/outputs/androidTest-results/connected/flavors/$flavor/")];
+                testDirs.each { testDir ->
+                    if (!testDir.exists()) {
+                        logging.captureStandardOutput LogLevel.WARN
+                        println "WARNING: ignoring non-existant ${testDir.path}"
+                        return;
+                    }
+                    files(testDir.listFiles()).each { file ->
+                        new File(combined, file.getName()) << file.text
+                    }
+                }
+            }
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

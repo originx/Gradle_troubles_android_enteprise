@@ -1,0 +1,68 @@
+task clearGoogleServices() {
+    delete "google-services.json"
+}
+
+task switchGoogleServicesToDebug(type: Copy) {
+    from "firebase/dev-test-de-it-mx-us_google-services.json"
+    rename ("dev-test-de-it-mx-us_google-services.json", "google-services.json")
+    into "."
+}
+
+task switchGoogleServicesToGermanyRelease(type: Copy) {
+    from "firebase/prod-beta-de_google-services.json"
+    rename ("prod-beta-de_google-services.json", "google-services.json")
+    into "."
+}
+
+task switchGoogleServicesToItalyRelease(type: Copy) {
+    from "firebase/prod-beta-it_google-services.json"
+    rename ("prod-beta-it_google-services.json", "google-services.json")
+    into "."
+}
+
+task switchGoogleServicesToMexicoRelease(type: Copy) {
+    from "firebase/prod-beta-mx_google-services.json"
+    rename ("prod-beta-mx_google-services.json", "google-services.json")
+    into "."
+}
+
+task switchGoogleServicesToUsRelease(type: Copy) {
+    from "firebase/prod-beta-us_google-services.json"
+    rename ("prod-beta-us_google-services.json", "google-services.json")
+    into "."
+}
+
+afterEvaluate {
+
+    // Clear
+    switchGoogleServicesToDebug.dependsOn clearGoogleServices
+    switchGoogleServicesToGermanyRelease.dependsOn clearGoogleServices
+    switchGoogleServicesToItalyRelease.dependsOn clearGoogleServices
+    switchGoogleServicesToMexicoRelease.dependsOn clearGoogleServices
+    switchGoogleServicesToUsRelease.dependsOn clearGoogleServices
+
+    // Config De
+    processPayGermanyCompatDebugGoogleServices.dependsOn switchGoogleServicesToDebug
+    processPayGermanyBleedingDebugGoogleServices.dependsOn switchGoogleServicesToDebug
+    processPayGermanyCompatReleaseGoogleServices.dependsOn switchGoogleServicesToGermanyRelease
+    processPayGermanyBleedingReleaseGoogleServices.dependsOn switchGoogleServicesToGermanyRelease
+
+    // Config It
+    processNonpayItalyCompatDebugGoogleServices.dependsOn switchGoogleServicesToDebug
+    processNonpayItalyBleedingDebugGoogleServices.dependsOn switchGoogleServicesToDebug
+    processNonpayItalyCompatReleaseGoogleServices.dependsOn switchGoogleServicesToItalyRelease
+    processNonpayItalyBleedingReleaseGoogleServices.dependsOn switchGoogleServicesToItalyRelease
+
+    // Config Mx
+    processNonpayMexicoCompatDebugGoogleServices.dependsOn switchGoogleServicesToDebug
+    processNonpayMexicoBleedingDebugGoogleServices.dependsOn switchGoogleServicesToDebug
+    processNonpayMexicoCompatReleaseGoogleServices.dependsOn switchGoogleServicesToMexicoRelease
+    processNonpayMexicoBleedingReleaseGoogleServices.dependsOn switchGoogleServicesToMexicoRelease
+
+    // Config Us
+    processNonpayUnitedStatesCompatDebugGoogleServices.dependsOn switchGoogleServicesToDebug
+    processNonpayUnitedStatesBleedingDebugGoogleServices.dependsOn switchGoogleServicesToDebug
+    processNonpayUnitedStatesCompatReleaseGoogleServices.dependsOn switchGoogleServicesToUsRelease
+    processNonpayUnitedStatesBleedingReleaseGoogleServices.dependsOn switchGoogleServicesToUsRelease
+
+}

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "12341234",
+    "firebase_url": "https://api-project-12341234.firebaseio.com",
+    "project_id": "api-project-12341234",
+    "storage_bucket": "api-project-12341234.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12341234:android:12341234",
+        "android_client_info": {
+          "package_name": "fail.multidex.espresso.it"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "12341234-12341234.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "12341234"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

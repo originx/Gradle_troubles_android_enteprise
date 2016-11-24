@@ -1,0 +1,79 @@
+//
+// Adds tasks to create unit test coverage reports for all existing flavors in a module.
+// Adapted to work on multi-dimension build variants.
+//
+// Original source: https://blog.gouline.net/2015/06/23/code-coverage-on-android-with-jacoco/
+//
+apply plugin: 'jacoco'
+
+jacoco {
+	toolVersion = "0.7.6.201602180812"
+}
+
+project.afterEvaluate {
+	def buildTypes = android.buildTypes.collect { type -> type.name }
+	def productVariants = []
+	if (android.hasProperty("applicationVariants")) {
+		productVariants = android.applicationVariants.collect { variant ->
+			String variantName = variant.productFlavors[0].name
+			for (int i = 1; i < variant.productFlavors.size(); ++i) {
+				variantName += variant.productFlavors[i].name.capitalize()
+			}
+			return variantName
+		}
+	} else if (android.hasProperty("libraryVariants")) {
+		productVariants = android.libraryVariants.collect { variant ->
+			String variantName = variant.productFlavors[0].name
+			for (int i = 1; i < variant.productFlavors.size(); ++i) {
+				variantName += variant.productFlavors[i].name.capitalize()
+			}
+			return variantName
+		}
+	}
+
+	if (!productVariants) productVariants.add('')
+
+	productVariants.each { productVariantName ->
+		buildTypes.each { buildTypeName ->
+			def sourceName = "${buildTypeName}"
+			if (productVariantName) {
+				sourceName = "${productVariantName}${sourceName.capitalize()}"
+			}
+			def targetName = "${sourceName.capitalize()}"
+			def testTaskName = "test${sourceName.capitalize()}UnitTest"
+			def coverageTaskName = "${testTaskName}Coverage"
+
+			if (project.tasks.findByPath(testTaskName) && !project.tasks.findByPath(coverageTaskName)) {
+				task "$coverageTaskName"(type: JacocoReport, dependsOn: "$testTaskName") {
+					group = "Reporting"
+					description = "Generate Jacoco coverage reports on the ${targetName} build."
+
+					classDirectories = fileTree(
+							dir: "${project.buildDir}/intermediates/classes/${sourceName}",
+							excludes: ['**/R.class',
+									   '**/R$*.class',
+									   '**/*$ViewInjector*.*',
+									   '**/*_Provide*Factory.*',
+									   '**/*_MembersInjector.*',
+									   '**/BuildConfig.*',
+									   '**/Manifest*.*']
+					)
+
+					def coverageSourceDirs = [
+							"src/main/java",
+							"src/$productVariantName/java",
+							"src/$buildTypeName/java"
+					]
+					additionalSourceDirs = files(coverageSourceDirs)
+					sourceDirectories = files(coverageSourceDirs)
+					executionData = files("${project.buildDir}/jacoco/${testTaskName}.exec")
+
+					reports {
+						xml.enabled = true
+						html.enabled = true
+					}
+				}
+			}
+		}
+	}
+}
