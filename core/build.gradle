@@ -150,8 +150,8 @@ dependencies {
     compile 'nl.littlerobots:cupboard-tools:0.2.0'
     compile 'nl.2312:rxcupboard:0.7'
     compile 'net.danlew:android.joda:2.9.3'
-    compile 'com.squareup.okhttp3:okhttp:3.5.0-SNAPSHOT'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.5.0-SNAPSHOT'
+    compile 'com.squareup.okhttp3:okhttp:3.5.0'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.5.0'
     compile('io.reactivex:rxandroid:1.2.1') {
         exclude group: 'io.reactivex:rxjava', module: 'rxjava'
     }
