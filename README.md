@@ -1,9 +1,19 @@
 # multidex
 
 Example project which demonstrate espresso multidex issues
-And also instant run issues with gradle build scripts
+And also instant run issues with gradle build scripts <-- disable instant run if you want to use Android studio with this
 
 To run please disable instant run
+
+# Open:
+
+- Instant run does not run with this project last time i checked, please disable it
+
+- Multidex fails with gradle 2.4.0-alpha4 plugin while running tests
+
+
+
+# RESOLVED:
 
 To reproduce multidex issue please run following command
 
