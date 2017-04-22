@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.fernandocejas.frodo'
 apply from: '../jacoco-unit-tests.gradle'
@@ -40,14 +39,14 @@ android {
         }
     }
 
-    compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    compileSdkVersion defaultCompileSdkVersion
+    buildToolsVersion defaultBuildToolsVersion
 
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion defaultTargetSdkVersion
 
         buildConfigField "String", "BUILD_REVISION", "\"${revision}\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
@@ -123,7 +122,7 @@ android {
 }
 
 dependencies {
-    apt 'com.google.dagger:dagger-compiler:2.4'
+    apt "com.google.dagger:dagger-compiler:${daggerVersion}"
     // for germany only
 
     // for all countries
@@ -134,12 +133,12 @@ dependencies {
         exclude group: 'com.android.support'
     }
     provided 'javax.annotation:jsr250-api:1.0'
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:support-annotations:25.0.1'
-    compile 'com.android.support:recyclerview-v7:25.0.1'
-    compile 'com.android.support:design:25.0.1'
-    compile 'com.android.support:customtabs:25.0.1'
-    compile 'com.google.dagger:dagger:2.4'
+    compile "com.android.support:appcompat-v7:${defaultSupportLibVersion}"
+    compile "com.android.support:support-annotations:${defaultSupportLibVersion}"
+    compile "com.android.support:recyclerview-v7:${defaultSupportLibVersion}"
+    compile "com.android.support:design:${defaultSupportLibVersion}"
+    compile "com.android.support:customtabs:${defaultSupportLibVersion}"
+    compile "com.google.dagger:dagger:${daggerVersion}"
     compile 'com.facebook.conceal:conceal:1.0.5@aar'
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.google.zxing:core:3.3.0'
@@ -191,20 +190,19 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.3.1'
     // tracking
     compile 'com.adjust.sdk:adjust-android:4.10.2'
-    retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.1.0'
-    testApt 'com.google.dagger:dagger-compiler:2.4'
-    androidTestCompile 'com.google.dagger:dagger:2.4'
+    testApt "com.google.dagger:dagger-compiler:${daggerVersion}"
+    androidTestCompile "com.google.dagger:dagger:${daggerVersion}"
     testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.1.4'
-    testCompile 'org.robolectric:shadows-core-v22:3.1.4'
-    testCompile 'org.robolectric:shadows-support-v4:3.1.4'
-    testCompile 'org.robolectric:shadows-multidex:3.1.4'
-    testCompile 'org.robolectric:shadows-play-services:3.1.4'
-    testCompile 'org.robolectric:shadows-httpclient:3.1.4'
+    testCompile "org.robolectric:robolectric:${robolectricVersion}"
+    testCompile "org.robolectric:shadows-core-v22:${robolectricShadowVersion}"
+    testCompile "org.robolectric:shadows-support-v4:${robolectricVersion}"
+    testCompile "org.robolectric:shadows-multidex:${robolectricVersion}"
+    testCompile "org.robolectric:shadows-play-services:${robolectricVersion}"
+    testCompile "org.robolectric:shadows-httpclient:${robolectricVersion}"
     testCompile 'org.mockito:mockito-core:1.10.19'
     androidTestCompile 'com.android.support:multidex-instrumentation:1.0.1'
     androidTestCompile 'junit:junit:4.12'
     compile 'com.fernandocejas.frodo:frodo-api:0.8.2'
-    compile 'com.android.support:support-v4:25.0.1'
+    compile "com.android.support:support-v4:${defaultSupportLibVersion}"
     compile files('libs/omniture-4.6.1.jar')
 }
