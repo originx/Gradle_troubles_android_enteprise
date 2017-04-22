@@ -43,7 +43,7 @@ android {
 
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion defaultMinSdkVersion
         targetSdkVersion defaultTargetSdkVersion
 
         buildConfigField "String", "BUILD_REVISION", "\"${revision}\""

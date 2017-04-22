@@ -62,7 +62,7 @@ android {
         applicationId "fail.multidex.espresso"
 
 
-        minSdkVersion 16
+        minSdkVersion defaultMinSdkVersion
         targetSdkVersion defaultTargetSdkVersion
 
         testInstrumentationRunner "espresso.fail.multidex.CustomJunitRunner"
