@@ -1,5 +1,3 @@
-import java.util.regex.Pattern
-
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
@@ -55,17 +53,10 @@ android {
 
 
     signingConfigs {
-        release {
-            storeFile file('../Assets/release.jks')
-            storePassword "release"
-            keyAlias "release"
-            keyPassword "release"
-        }
-  debug {
-            storeFile file('../Assets/release.jks')
-            storePassword "release"
-            keyAlias "release"
-            keyPassword "release"
+        debug {
+            storePassword "android"
+            keyPassword "android"
+            keyAlias "androiddebugkey"
         }
     }
 
@@ -128,7 +119,7 @@ android {
         }
         germany {
             dimension 'country'
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             applicationId "fail.multidex.espresso.de"
             buildConfigField "boolean", PAY_START, "true"
             versionCode appVersionCodeDE
@@ -137,7 +128,7 @@ android {
         }
         italy {
             dimension 'country'
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             applicationId "fail.multidex.espresso.it"
             versionCode appVersionCodeIT
             versionName appVersionNameIT
@@ -145,7 +136,7 @@ android {
         }
         mexico {
             dimension 'country'
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             applicationId "fail.multidex.espresso.mx"
             versionCode appVersionCodeMX
             versionName appVersionNameMX
@@ -153,7 +144,7 @@ android {
         }
         unitedStates {
             dimension 'country'
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             applicationId "fail.multidex.espresso.us"
             versionCode appVersionCodeUS
             versionName appVersionNameUS
