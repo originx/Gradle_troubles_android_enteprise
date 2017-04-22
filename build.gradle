@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
-      jcenter()
+        jcenter()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url 'https://maven.fabric.io/public' }
     }
@@ -25,6 +25,19 @@ buildscript {
     configurations {
         androidTestCompile.exclude group: 'com.android.support', module: 'support-v4'
     }
+}
+
+ext {
+    defaultCompileSdkVersion = 25
+    defaultMinSdkVersion = 14
+    defaultTargetSdkVersion = 25
+    defaultBuildToolsVersion = "25.0.2"
+    defaultSupportLibVersion = "25.3.1"
+    retrofitVersion = "2.1.0"
+    rxJavaVersion = "1.2.9"
+    daggerVersion = "2.10"
+    robolectricVersion = "3.3.2"
+    robolectricShadowVersion = "3.1.4"
 }
 
 //fixme libs - the debug screens use the VERSION_NAME and VERSION_CODE data from their
@@ -56,7 +69,6 @@ ext.appVersionMinorUS = 0 // at most 63
 ext.appVersionPatchUS = 0 // at most 127
 ext.appVersionBuildUS = 0 // at most 16383
 
-
 // we have 31 bits (unsigned) available, so that leaves us with
 // 2^4 for versionMajor (0-15),
 // 2^6 for versionMinor (0-63),
@@ -75,7 +87,7 @@ ext.appVersionCodeUS = getVersionCode(ext.appVersionMajorUS, ext.appVersionMinor
 ext.appVersionNameUS = getVersionName(ext.appVersionMajorUS, ext.appVersionMinorUS, ext.appVersionPatchUS)
 
 ext.revision = getSvnRevision()
-if(ext.revision==0){ //if current directory is not a working svn directory
+if (ext.revision == 0) { //if current directory is not a working svn directory
     ext.revision = getGitRevision();
 }
 
@@ -135,14 +147,14 @@ def getSvnRevision() {
     new ByteArrayOutputStream().withStream { os ->
         ext.svnRev = 0
 
-        try{
+        try {
             //noinspection GroovyUnusedAssignment
             def result = exec {
                 executable = 'svn'
                 args = ['info']
                 standardOutput = os
             }
-        }catch (Exception e){
+        } catch (Exception e) {
         }
         def outputAsString = os.toString()
         def matchLastChangedRev = outputAsString =~ /Last Changed Rev: (\d+)/
@@ -155,8 +167,8 @@ def getSvnRevision() {
     return svnRev
 }
 
-def getGitRevision(){
-    try{
+def getGitRevision() {
+    try {
         def gitFolder = "$projectDir/.git/"
         def takeFromHash = 12
         /*
@@ -168,11 +180,11 @@ def getGitRevision(){
         def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
         // def isRef = head.length > 1     // ref: refs/heads/master
 
-        if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+        if (isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
 
         def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
         refHead.text.trim().take takeFromHash
-    }catch (Exception e){
+    } catch (Exception e) {
     }
 }
 

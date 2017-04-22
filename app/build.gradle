@@ -3,8 +3,6 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.fernandocejas.frodo'
 apply from: '../jacoco-unit-tests.gradle'
-// ------------------------------------------------------------------------------------------
-
 apply plugin: 'spoon'
 
 spoon {
@@ -38,8 +36,8 @@ android {
         }
     }
 
-    compileSdkVersion 25
-    buildToolsVersion '25'
+    compileSdkVersion defaultCompileSdkVersion
+    buildToolsVersion defaultBuildToolsVersion
 
     useLibrary 'org.apache.http.legacy'
 
@@ -65,7 +63,7 @@ android {
 
 
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion defaultTargetSdkVersion
 
         testInstrumentationRunner "espresso.fail.multidex.CustomJunitRunner"
 
@@ -223,19 +221,19 @@ dependencies {
     // do not remove from app.gradle or firebase will crash when receiving messages
     compile 'com.google.android.gms:play-services-location:9.8.0'
 
-    apt 'com.google.dagger:dagger-compiler:2.4'
-    testApt 'com.google.dagger:dagger-compiler:2.4'
-    compile 'com.google.dagger:dagger:2.4'
-    androidTestApt 'com.google.dagger:dagger-compiler:2.4'
-    androidTestCompile 'com.google.dagger:dagger:2.4'
+    apt "com.google.dagger:dagger-compiler:${daggerVersion}"
+    testApt "com.google.dagger:dagger-compiler:${daggerVersion}"
+    compile "com.google.dagger:dagger:${daggerVersion}"
+    androidTestApt "com.google.dagger:dagger-compiler:${daggerVersion}"
+    androidTestCompile "com.google.dagger:dagger:${daggerVersion}"
 
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:support-annotations:25.0.1'
-    testCompile 'com.android.support:support-annotations:25.0.1'
-    androidTestCompile 'com.android.support:support-annotations:25.0.1'
-    compile 'com.android.support:recyclerview-v7:25.0.1'
-    compile 'com.android.support:cardview-v7:25.0.1'
-    compile 'com.android.support:design:25.0.1'
+    compile "com.android.support:appcompat-v7:${defaultSupportLibVersion}"
+    compile "com.android.support:support-annotations:${defaultSupportLibVersion}"
+    testCompile "com.android.support:support-annotations:${defaultSupportLibVersion}"
+    androidTestCompile "com.android.support:support-annotations:${defaultSupportLibVersion}"
+    compile "com.android.support:recyclerview-v7:${defaultSupportLibVersion}"
+    compile "com.android.support:cardview-v7:${defaultSupportLibVersion}"
+    compile "com.android.support:design:${defaultSupportLibVersion}"
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.jakewharton:butterknife:7.0.1'
 
@@ -313,24 +311,24 @@ dependencies {
         exclude module: 'support-v7'
     }
 
-    apt 'com.google.dagger:dagger-compiler:2.4'
-    compile 'com.google.dagger:dagger:2.4'
+    apt "com.google.dagger:dagger-compiler:${daggerVersion}"
+    compile "com.google.dagger:dagger:${daggerVersion}"
     compile 'com.android.support:multidex:1.0.1'
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.1.4'
+    testCompile "org.robolectric:robolectric:${robolectricVersion}"
     androidTestCompile 'de.greenrobot:eventbus:2.4.0'
     testCompile 'de.greenrobot:eventbus:2.4.0'
-    testCompile 'org.robolectric:shadows-core-v22:3.1.4'
-    testCompile 'org.robolectric:shadows-support-v4:3.1.4'
-    testCompile 'org.robolectric:shadows-multidex:3.1.4'
-    testCompile 'org.robolectric:shadows-play-services:3.1.4'
-    testCompile 'org.robolectric:shadows-httpclient:3.1.4'
+    testCompile "org.robolectric:shadows-core-v22:${robolectricShadowVersion}"
+    testCompile "org.robolectric:shadows-support-v4:${robolectricVersion}"
+    testCompile "org.robolectric:shadows-multidex:${robolectricVersion}"
+    testCompile "org.robolectric:shadows-play-services:${robolectricVersion}"
+    testCompile "org.robolectric:shadows-httpclient:${robolectricVersion}"
     testCompile 'org.mockito:mockito-core:1.10.19'
-    androidTestCompile 'com.google.dagger:dagger:2.4'
+    androidTestCompile "com.google.dagger:dagger:${daggerVersion}"
     androidTestCompile 'org.mockito:mockito-core:1.10.19'
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'com.crittercism.dexmaker:dexmaker:1.4'
@@ -338,8 +336,8 @@ dependencies {
     androidTestCompile 'com.crittercism.dexmaker:dexmaker-mockito:1.4'
     androidTestCompile 'com.squareup.spoon:spoon-client:1.7.0'
     androidTestCompile 'com.squareup.okhttp3:mockwebserver:3.5.0'
-    androidTestApt 'com.google.dagger:dagger-compiler:2.4'
-    testApt 'com.google.dagger:dagger-compiler:2.4'
+    androidTestApt "com.google.dagger:dagger-compiler:${daggerVersion}"
+    testApt "com.google.dagger:dagger-compiler:${daggerVersion}"
 
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
     provided 'javax.annotation:jsr250-api:1.0'
