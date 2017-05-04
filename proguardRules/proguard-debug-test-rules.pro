@@ -14,6 +14,7 @@
 -keep, includedescriptorclasses class com.squareup.** {*;}
 -dontwarn android.test.**
 -dontwarn android.support.test.**
+-keep, includedescriptorclasses class de.companyname.app.testutil.**{*;}
 
 # Specific classes that common test libs warn about
 -dontwarn java.beans.**
@@ -99,7 +100,3 @@
 -keep interface okhttp3.** { *; }
 -dontwarn okhttp3.**
 -dontwarn okio.**
-
-#adition
--keep class com.adition.android.sdk.** {*;}
--dontwarn com.adition.android.sdk.**

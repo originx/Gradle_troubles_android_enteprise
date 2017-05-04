@@ -33,14 +33,11 @@
 }
 
 # we need this to keep our model classes
+-keep class de.companyname.core.data.network.api.model.** { *; }
 
 -keepclassmembernames interface * {
     @retrofit.http.* <methods>;
 }
-
-#adition
--keep class com.adition.android.sdk.** {*;}
--dontwarn com.adition.android.sdk.**
 
 
 # Joda Time
@@ -95,6 +92,8 @@ public void onEvent*(**);
 # komensky validation lib
 -keepattributes *Annotation*
 -keep class eu.inmite.android.lib.validations.form.annotations.** { *; }
+-keep class de.companyname.paylib.util.PinValidation  { *; }
+-keep class de.companyname.paylib.util.RegexOrderValidation  { *; }
 -keep class * implements eu.inmite.android.lib.validations.form.iface.ICondition
 -keep class * implements eu.inmite.android.lib.validations.form.iface.IValidator
 -keep class * implements eu.inmite.android.lib.validations.form.iface.IFieldAdapter
@@ -102,66 +101,143 @@ public void onEvent*(**);
     @eu.inmite.android.lib.validations.form.annotations.** *;
 }
 
-# Adjust
+## Adjust
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
--keep,includedescriptorclasses class com.adjust.sdk.plugin.MacAddressUtil {
+-keep class com.adjust.sdk.plugin.MacAddressUtil {
     java.lang.String getMacAddress(android.content.Context);
 }
--keep,includedescriptorclasses class com.adjust.sdk.plugin.AndroidIdUtil {
+-keep class com.adjust.sdk.plugin.AndroidIdUtil {
     java.lang.String getAndroidId(android.content.Context);
 }
--keep,includedescriptorclasses class com.google.android.gms.common.ConnectionResult {
+-keep class com.google.android.gms.common.ConnectionResult {
     int SUCCESS;
 }
-
--keep,includedescriptorclasses class com.google.android.gms.ads.identifier.AdvertisingIdClient$Info {
+-keep class com.google.android.gms.ads.identifier.AdvertisingIdClient {
+    com.google.android.gms.ads.identifier.AdvertisingIdClient$Info getAdvertisingIdInfo(android.content.Context);
+}
+-keep class com.google.android.gms.ads.identifier.AdvertisingIdClient$Info {
     java.lang.String getId();
     boolean isLimitAdTrackingEnabled();
 }
 
--keep,includedescriptorclasses class com.google.android.gms.ads.identifier.AdvertisingIdClient {
-    com.google.android.gms.ads.identifier.AdvertisingIdClient$Info getAdvertisingIdInfo(android.content.Context);
-}
-
--dontnote  android.os.Build
--dontwarn  android.os.Build
--dontnote  com.adjust.sdk.Reflection
--dontwarn  com.adjust.sdk.Reflection
 -dontnote  android.os.SystemProperties
 -dontwarn android.os.SystemProperties
+
+-keep class dalvik.system.VMRuntime {
+    java.lang.String getRuntime();
+}
+-dontwarn dalvik.system.VMRuntime
+-dontnote dalvik.system.VMRuntime
+
+-keep class android.os.Build {
+    java.lang.String[] SUPPORTED_ABIS;
+    java.lang.String CPU_ABI;
+}
+-dontnote android.os.Build
+-dontwarn android.os.Build
 -dontnote android.os.Build$*
 -dontwarn android.os.Build$*
--keep,includedescriptorclasses class com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor{ *; }
+-keep class android.content.res.Configuration {
+    android.os.LocaledList getLocales();
+    java.util.Locale locale;
+}
+
+
+
+
+-keep class android.os.LocaledList {
+    java.util.Locale get(int);
+}
+-dontwarn android.os.LocaledList
+-dontnote android.os.LocaledList
+
+-dontwarn android.content.res.Configuration
+-dontnote android.content.res.Configuration
+
+#firebase or gms ?
+-keep class com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor {
+    *;
+    <fields>;
+    public protected *;
+}
 -dontnote  com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor
 -dontwarn  com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor
--dontnote rx.internal.util.PlatformDependent
--dontwarn rx.internal.util.PlatformDependent
 
--keep,includedescriptorclasses class com.google.android.gms.measurement.AppMeasurement$*{ *; }
--dontnote   com.google.android.gms.measurement.AppMeasurement$*
--dontwarn   com.google.android.gms.measurement.AppMeasurement$*
-
--keep,includedescriptorclasses class com.google.firebase.FirebaseApp{ *; }
--dontnote   com.google.android.gms.measurement.AppMeasurement$*
--dontwarn   com.google.android.gms.measurement.AppMeasurement$*
-
--keep,includedescriptorclasses class com.google.android.gms.common.*{ *; }
--dontnote com.google.android.gms.common.*
--dontwarn com.google.android.gms.common.*
--keep,includedescriptorclasses class com.google.android.gms.dynamic.*{ *; }
--dontnote com.google.android.gms.dynamic.*
--dontwarn com.google.android.gms.dynamic.*
-
--keep,includedescriptorclasses class com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor.*{ *; }
--dontnote com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor.*
--dontwarn com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor.*
--dontnote com.google.android.gms.internal.*
--dontwarn com.google.android.gms.internal.*
+-keep class com.google.android.gms.dynamite.DynamiteModule$DynamiteLoaderClassLoader {
+    *;
+    <fields>;
+    public protected *;
+}
+-dontnote  com.google.android.gms.dynamite.DynamiteModule$DynamiteLoaderClassLoader
+-dontwarn  com.google.android.gms.dynamite.DynamiteModule$DynamiteLoaderClassLoader
 
 
+-keep class com.google.android.gms.dynamite.DynamiteModule {
+    *;
+    <fields>;
+    public protected *;
+}
+-dontnote  com.google.android.gms.dynamite.DynamiteModule
+-dontwarn  com.google.android.gms.dynamite.DynamiteModule
+
+
+-keep class de.companyname.paylib.data.**{
+*;
+<fields>;
+public protected *;}
+
+-keep class de.companyname.paylib.nfc.models.**{
+*;
+<fields>;
+public protected *;}
+
+
+-keep class de.companyname.paylib.parcelables.**{
+*;
+<fields>;
+public protected *;}
+
+-keep,includedescriptorclasses class *  extends de.companyname.core.tracking.adjust.IAdjustEvent{
+*;
+<fields>;
+public protected *;}
+
+-keep class de.companyname.paylib.events.**{
+*;
+<fields>;
+public protected *;}
+-keep class de.companyname.core.events.**{
+*;
+<fields>;
+public protected *;}
+
+-keep class de.companyname.core.data.coupon.events.**{
+*;
+<fields>;
+public protected *;}
+
+-keep class de.companyname.core.util.networking.NetworkChangedEvent{
+*;
+<fields>;
+public protected *;}
+
+-keep class de.companyname.app.ui.onlineshopping.ads.AdAreaEvent{
+*;
+<fields>;
+public protected *;}
+
+-keep class de.companyname.app.ui.coupons.CouponActivatedEvent{
+*;
+<fields>;
+public protected *;}
+
+-keep class de.companyname.app.ui.couponfilter.service.CouponFilterChangedEvent{
+*;
+<fields>;
+public protected *;}
 ##---------------Begin: proguard configuration for Gson  ----------
 # Gson uses generic type information stored in a class file when working with fields. Proguard
 # removes such information by default, so configure it to keep all of it.
@@ -226,6 +302,21 @@ public void onEvent*(**);
 
 #Cupboard
 # we need this to keep our model classes
+-keep class de.companyname.core.data.coupon.Coupon { *; }
+-keep class de.companyname.core.data.coupon.OriginalCoupon { *; }
+-keep class de.companyname.core.data.partner.OriginalPartnerList { *; }
+-keep class de.companyname.core.data.accountbalance.AccountTransaction { *; }
+-keep class de.companyname.core.data.accountbalance.AccountBalance { *; }
+-keep class de.companyname.core.data.feed.TileItem { *; }
+-keep class de.companyname.core.data.accountbalance.EventDetail { *; }
+-keep,includedescriptorclasses class de.companyname.core.config.** { *;
+  <fields>;}
+-keep,includedescriptorclasses class de.companyname.core.config.** { *;
+ <fields>;}
+-keep class de.companyname.core.config.** {
+ <fields>;
+     *;
+  }
 
   # To support Enum type of class members
   -keep enum * { *; }
@@ -237,4 +328,83 @@ public void onEvent*(**);
 -keep,includedescriptorclasses interface com.nineoldandroids.view.** { *; }
 
 #descriptor classes
+-keep,includedescriptorclasses class com.google.gson.JsonElement { *; }
+-keep,includedescriptorclasses class com.google.gson.reflect.TypeToken { *; }
+-keep,includedescriptorclasses class de.companyname.core.data.accountbalance.AccountTransactionDetail  { *; }
+-keep,includedescriptorclasses class de.companyname.paylib.data.accountbalance.PayAccountTransaction { *; }
+-keep,includedescriptorclasses class de.companyname.core.data.user.User { *; }
+-keep,includedescriptorclasses class de.companyname.app.ui.coupons.CouponView { *; }
+-keep,includedescriptorclasses interface de.companyname.core.ui.animation.IAnimationListener { *; }
+-keep,includedescriptorclasses class de.companyname.core.data.partner.OnlineShoppingElement { *; }
+-keep,includedescriptorclasses class com.google.gson.JsonSerializationContext { *; }
+-keep,includedescriptorclasses class com.google.gson.JsonDeserializationContext { *; }
+-keep,includedescriptorclasses class de.companyname.core.config.** { *; }
+-keep,includedescriptorclasses class de.companyname.core.data.persistence.cache.CachePolicy { *; }
+-keep,includedescriptorclasses class de.companyname.core.data.network.api.RestAPICore { *; }
+
+#paylib
+-keep class de.companyname.paylib.ui.widget.PayToolbarSwitcher { *; }
+-keepclassmembers,includedescriptorclasses class de.companyname.paylib.ui.widget.PayToolbarSwitcher { *; }
+-keep class de.companyname.paylib.ui.widget.PayToolbarSwitcher$* {
+    *;
+    **[] $VALUES;
+    public *;
+    <fields>;}
+
 # Proximity
+-keep class net.companyname.proximity.sdk.** { *;}
+-keepattributes Exceptions, InnerClasses, Annotation, Signature, EnclosingMethod
+-keep public enum net.companyname.proximity.sdk.** {
+**[] $VALUES;
+public *;
+}
+
+#rxjava
+-dontnote rx.internal.util.PlatformDependent
+-dontwarn rx.internal.util.PlatformDependent
+
+#https://stackoverflow.com/questions/33047806/proguard-duplicate-definition-of-library-class
+-dontnote android.net.http.*
+-dontnote org.apache.commons.codec.**
+-dontnote org.apache.http.**
+
+# Glide Module
+-keep public class * implements com.bumptech.glide.module.GlideModule
+
+# Google Play Services
+# Keep it up to date with [https://developers.google.com/android/guides/setup#Proguard]
+-keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
+    public static final *** NULL;
+}
+
+-keepnames class * implements android.os.Parcelable
+-keepclassmembers class * implements android.os.Parcelable {
+  public static final *** CREATOR;
+}
+
+-keep @interface android.support.annotation.Keep
+-keep @android.support.annotation.Keep class *
+-keepclasseswithmembers class * {
+  @android.support.annotation.Keep <fields>;
+}
+-keepclasseswithmembers class * {
+  @android.support.annotation.Keep <methods>;
+}
+
+-keep @interface com.google.android.gms.common.annotation.KeepName
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+  @com.google.android.gms.common.annotation.KeepName *;
+}
+
+-keep @interface com.google.android.gms.common.util.DynamiteApi
+-keep public @com.google.android.gms.common.util.DynamiteApi class * {
+  public <fields>;
+  public <methods>;
+}
+
+-dontwarn android.security.NetworkSecurityPolicy
+
+## http://stackoverflow.com/questions/18646899/proguard-cant-find-referenced-class-com-google-android-gms-r/24109609#24109609
+-keep public class com.google.android.gms.* { public *; }
+-dontwarn com.google.android.gms.**
