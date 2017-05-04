@@ -1,8 +1,11 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.fernandocejas.frodo'
+apply plugin: 'com.github.triplet.play'
 apply from: '../jacoco-unit-tests.gradle'
+// --------------------------------------------------------------------------
+
 apply plugin: 'spoon'
 
 spoon {
@@ -23,31 +26,26 @@ android {
         timeOutInMs 120 * 1000 // 120 seconds
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility versions.android.javaVersion
+        targetCompatibility versions.android.javaVersion
     }
 
-    testOptions {
-        unitTests {
-            all {
-                // configure the test JVM arguments
-                jvmArgs '-noverify'
-            }
-        }
+    
+
+    compileSdkVersion versions.android.compileSdk
+    buildToolsVersion versions.android.buildTools
+
+    dataBinding {
+        enabled = true
     }
-
-    compileSdkVersion defaultCompileSdkVersion
-    buildToolsVersion defaultBuildToolsVersion
-
-    useLibrary 'org.apache.http.legacy'
 
     dexOptions {
         jumboMode true
-        preDexLibraries preDexEnabled
+        //attempt to use the build cache
+//        preDexLibraries preDexEnabled
         javaMaxHeapSize "4g"
         maxProcessCount = 8
     }
-
 
     signingConfigs {
         debug {
@@ -57,13 +55,20 @@ android {
         }
     }
 
-
     defaultConfig {
-        applicationId "fail.multidex.espresso"
+        applicationId "de.companyname.app.multidexfail"
 
+        if (isProduction) { //Override Appname for production builds, so this is NOT country specific anymore
+            resValue "string", "app_name_country", "companyname"
+        }
 
-        minSdkVersion defaultMinSdkVersion
-        targetSdkVersion defaultTargetSdkVersion
+        minSdkVersion versions.android.minSdk
+        targetSdkVersion versions.android.targetSdk
+
+        buildConfigField "String", "BUILD_REVISION", "\"${revision}\""
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
+        buildConfigField "boolean", "IS_PRODUCTION", "${isProduction}"
+        buildConfigField "boolean", "IS_BETA", "${isBeta}"
 
         testInstrumentationRunner "espresso.fail.multidex.CustomJunitRunner"
 
@@ -81,6 +86,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-rules.pro', '../proguardRules/proguard-debug-rules.pro'
             testProguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-rules.pro', '../proguardRules/proguard-debug-test-rules.pro'
             testCoverageEnabled false
+            multiDexKeepProguard file('../proguardRules/multidex-proguard.pro')
         }
         release {
             minifyEnabled true
@@ -112,63 +118,66 @@ android {
         }
         compat {
             dimension 'api'
-            minSdkVersion 16
         }
         germany {
             dimension 'country'
             signingConfig signingConfigs.debug
-            applicationId "fail.multidex.espresso.de"
+            applicationId "de.companyname.client.android"
             buildConfigField "boolean", PAY_START, "true"
             versionCode appVersionCodeDE
             versionName appVersionNameDE
-            resConfigs "en", "de"
+            resConfigs "de"
         }
         italy {
             dimension 'country'
             signingConfig signingConfigs.debug
-            applicationId "fail.multidex.espresso.it"
+            applicationId "it.companyname.client.android"
             versionCode appVersionCodeIT
             versionName appVersionNameIT
-            resConfigs "en", "it"
+            resConfigs "it"
         }
         mexico {
             dimension 'country'
             signingConfig signingConfigs.debug
-            applicationId "fail.multidex.espresso.mx"
+            applicationId "mx.companyname.client.android"
             versionCode appVersionCodeMX
             versionName appVersionNameMX
-            resConfigs "en", "es"
+            resConfigs "es"
         }
         unitedStates {
             dimension 'country'
             signingConfig signingConfigs.debug
-            applicationId "fail.multidex.espresso.us"
+            applicationId "com.companyname.productName"
             versionCode appVersionCodeUS
             versionName appVersionNameUS
-            resConfigs "en", "en"
+            minSdkVersion versions.android.productNameMinSdk
+            resConfigs "en"
         }
     }
 
     lintOptions {
-        abortOnError false
+        baseline file("lint/lint-baseline.xml")
+        checkAllWarnings false
+        warningsAsErrors false
+        //disabling check until lint NPE is fixed
+        //https://code.google.com/p/android/issues/detail?id=230238
+        disable 'NewerVersionAvailable', 'LintBaseline'
+        abortOnError true
     }
 
     applicationVariants.all { variant ->
-//        variant.outputs[0].outputFile = new File(
-//                (String) variant.outputs[0].outputFile.parent,
-//                "DSA_" + variant.productFlavors[0].name + "_"
-//                        + variant.productFlavors[1].name + "_"
-//                        + "api" + variant.productFlavors[2].minSdkVersion.apiLevel + "_"
-//                        + variant.buildType.name + "_"
-//                        + (isProduction ? "prod_" : "")
-//                        + variant.mergedFlavor.versionName + ".apk")
-        //temporary workaround for spoon issue of chaning apk names see https://github.com/stanfy/spoon-gradle-plugin/issues/94
-        //when this is fixed top code can be again used since its cleaner and manuall copy task can be obsoleted
         variant.assemble.doLast {
             def originZipAlignedApkFile = variant.outputs[0].outputFile;
-            def renameZipAlignedApkFile = ("COMPANYNAME" + variant.productFlavors[0].name + "_"
+            def apiLevel = versions.android.minSdk;
+            def FLAVOR_DIMENSION_SIZE = 3
+            for (int i = 0; i < FLAVOR_DIMENSION_SIZE; i++) {
+                if (variant.productFlavors[i].minSdkVersion != null) {
+                    apiLevel = variant.productFlavors[i].minSdkVersion.apiLevel
+                }
+            }
+            def renameZipAlignedApkFile = ("companyname_" + variant.productFlavors[0].name + "_"
                     + variant.productFlavors[1].name + "_"
-                    + "api" + variant.productFlavors[2].minSdkVersion.apiLevel + "_"
+                    + "api" + apiLevel + "_"
                     + variant.buildType.name + "_"
                     + (isProduction.toBoolean() ? "prod_" : "")
                     + (isBeta.toBoolean() ? "beta_" : "")
@@ -200,6 +209,7 @@ android {
         exclude '.readme'
         exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
         exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
+        exclude 'META-INF/rxjava.properties'
     }
 
 }
@@ -207,57 +217,69 @@ android {
 // ------------------------------------------------------------------------------------------
 
 dependencies {
+    retrolambdaConfig libraries.retrolambda
+    annotationProcessor libraries.daggerCompiler
+    annotationProcessor libraries.butterknifeCompiler
+
     germanyCompile project(path: ':core', configuration: isProduction ? 'germanyLive' : 'germanyRelease')
     payCompile project(path: ':pay', configuration: 'germanyRelease')
 
     //build flags are not propagated to libs until following bug is fixed: https://code.google.com/p/android/issues/detail?id=52962
     //that is the reason we use release / live build types to chain different build configs trought the build modules
     italyCompile project(path: ':core', configuration: isProduction ? 'italyLive' : 'italyRelease')
-
     mexicoCompile project(path: ':core', configuration: isProduction ? 'mexicoLive' : 'mexicoRelease')
-
     unitedStatesCompile project(path: ':core', configuration: isProduction ? 'unitedStatesLive' : 'unitedStatesRelease')
 
+    debugCompile libraries.leakcanary
+    releaseCompile libraries.leakcanaryNoOp
+
+    compile libraries.supportAppcompat
+    compile libraries.supportAnnotations
+    compile libraries.supportAnnotations
+    compile libraries.supportRecyclerview
+    compile libraries.supportCardview
+    compile libraries.supportDesign
+    compile libraries.supportMultidex
     // do not remove from app.gradle or firebase will crash when receiving messages
-    compile 'com.google.android.gms:play-services-location:9.8.0'
-
-    apt "com.google.dagger:dagger-compiler:${daggerVersion}"
-    testApt "com.google.dagger:dagger-compiler:${daggerVersion}"
-    compile "com.google.dagger:dagger:${daggerVersion}"
-    androidTestApt "com.google.dagger:dagger-compiler:${daggerVersion}"
-    androidTestCompile "com.google.dagger:dagger:${daggerVersion}"
-
-    compile "com.android.support:appcompat-v7:${defaultSupportLibVersion}"
-    compile "com.android.support:support-annotations:${defaultSupportLibVersion}"
-    testCompile "com.android.support:support-annotations:${defaultSupportLibVersion}"
-    androidTestCompile "com.android.support:support-annotations:${defaultSupportLibVersion}"
-    compile "com.android.support:recyclerview-v7:${defaultSupportLibVersion}"
-    compile "com.android.support:cardview-v7:${defaultSupportLibVersion}"
-    compile "com.android.support:design:${defaultSupportLibVersion}"
-    compile 'de.greenrobot:eventbus:2.4.0'
-    compile 'com.jakewharton:butterknife:7.0.1'
-
-    compile('eu.inmite.android.lib:android-validation-komensky:0.9.2') {
+    compile libraries.playServicesLocation
+    compile libraries.dagger
+    provided libraries.jsr250
+    compile libraries.eventbus
+    compile libraries.butterknife
+    compile libraries.commonsCollections4
+    compile libraries.libphonenumber
+    compile(libraries.validationKomensky) {
         exclude group: 'com.google.android', module: 'support-v4'
     }
 
 
-    androidTestCompile 'io.reactivex:rxjava:1.1.7'
-    compile 'io.reactivex:rxjava:1.1.7'
-    androidTestCompile('io.reactivex:rxandroid:1.2.1')
-            {
-                exclude group: 'io.reactivex:rxjava', module: 'rxjava'
-            }
-    compile('io.reactivex:rxandroid:1.2.1')
-            {
-                exclude group: 'io.reactivex:rxjava', module: 'rxjava'
-            }
-    androidTestCompile 'com.artemzin.rxjava:proguard-rules:1.1.7.0'
-    compile 'com.artemzin.rxjava:proguard-rules:1.1.7.0'
-    testCompile 'com.artemzin.rxjava:proguard-rules:1.1.7.0'
+    testAnnotationProcessor libraries.daggerCompiler
+    testCompile libraries.supportAnnotations
+    testCompile libraries.leakcanaryNoOp
+    testCompile libraries.junit
+    testCompile libraries.eventbus //FIXME Is this necessary? There is already a compile libraries.eventbus
+    testCompile libraries.robolectric
+    testCompile libraries.robolectricShadowsCore
+    testCompile libraries.robolectricShadowsSupportV4
+    testCompile libraries.robolectricShadowsMultidex
+    testCompile libraries.robolectricShadowsPlayServices
+    testCompile libraries.robolectricShadowsHttpClient
+    testCompile libraries.mockito
 
-
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    androidTestAnnotationProcessor libraries.daggerCompiler
+    androidTestCompile libraries.supportAnnotations
+    androidTestCompile libraries.dagger
+    androidTestCompile libraries.rxjava2 //FIXME Is this needed? It is already added in Core
+//    androidTestCompile(libraries.rxandroid) { //FIXME Is this needed? It is already added in Core
+//        exclude group: 'io.reactivex:rxjava', module: 'rxjava'
+//    }
+    androidTestCompile libraries.eventbus //FIXME Is this necessary? There is already a compile libraries.eventbus
+    androidTestCompile libraries.mockito
+    androidTestCompile libraries.junit
+    androidTestCompile libraries.dexmaker
+    androidTestCompile libraries.dexmakerMockito
+    androidTestCompile libraries.spoon
+    androidTestCompile libraries.okhttp3Mockwebserver
 
     // there is a conflict with the test support library (see http://stackoverflow.com/questions/29857695)
     // so for now re exclude the support-annotations dependency from here to avoid clashes
@@ -267,6 +289,8 @@ dependencies {
         exclude module: 'recyclerview-v7'
         exclude module: 'support-v4'
         exclude module: 'support-v7'
+        exclude group: 'com.google.code.findbugs'
+        // FIXME http://stackoverflow.com/questions/37347326/errorconflict-with-dependency-com-google-code-findbugsjsr305
     }
     // exclude a couple of more modules here because of <http://stackoverflow.com/questions/29216327> and
     // more specifically of <https://code.google.com/p/android-test-kit/issues/detail?id=139>
@@ -278,6 +302,7 @@ dependencies {
         exclude module: 'recyclerview-v7'
         exclude module: 'support-v4'
         exclude module: 'support-v7'
+        exclude group: 'com.google.code.findbugs'
     }
     //excluded specific packages due to https://code.google.com/p/android/issues/detail?id=183454 -.-´´
     androidTestCompile('com.android.support.test.espresso:espresso-intents:2.2.2') {
@@ -286,6 +311,7 @@ dependencies {
         exclude module: 'recyclerview-v7'
         exclude module: 'support-v4'
         exclude module: 'support-v7'
+        exclude group: 'com.google.code.findbugs'
     }
 
     androidTestCompile('com.android.support.test.espresso:espresso-web:2.2.2') {
@@ -294,6 +320,7 @@ dependencies {
         exclude module: 'recyclerview-v7'
         exclude module: 'support-v4'
         exclude module: 'support-v7'
+        exclude group: 'com.google.code.findbugs'
     }
 
     androidTestCompile('com.android.support.test:runner:0.5') {
@@ -302,6 +329,7 @@ dependencies {
         exclude module: 'recyclerview-v7'
         exclude module: 'support-v4'
         exclude module: 'support-v7'
+        exclude group: 'com.google.code.findbugs'
     }
     androidTestCompile('com.android.support.test:rules:0.5') {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -311,115 +339,173 @@ dependencies {
         exclude module: 'support-v7'
     }
 
-    apt "com.google.dagger:dagger-compiler:${daggerVersion}"
-    compile "com.google.dagger:dagger:${daggerVersion}"
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'de.greenrobot:eventbus:2.4.0'
-    compile 'com.jakewharton:butterknife:8.4.0'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-    testCompile 'junit:junit:4.12'
-    testCompile "org.robolectric:robolectric:${robolectricVersion}"
-    androidTestCompile 'de.greenrobot:eventbus:2.4.0'
-    testCompile 'de.greenrobot:eventbus:2.4.0'
-    testCompile "org.robolectric:shadows-core-v22:${robolectricShadowVersion}"
-    testCompile "org.robolectric:shadows-support-v4:${robolectricVersion}"
-    testCompile "org.robolectric:shadows-multidex:${robolectricVersion}"
-    testCompile "org.robolectric:shadows-play-services:${robolectricVersion}"
-    testCompile "org.robolectric:shadows-httpclient:${robolectricVersion}"
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    androidTestCompile "com.google.dagger:dagger:${daggerVersion}"
-    androidTestCompile 'org.mockito:mockito-core:1.10.19'
-    androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'com.crittercism.dexmaker:dexmaker:1.4'
-    androidTestCompile 'com.crittercism.dexmaker:dexmaker-dx:1.4'
-    androidTestCompile 'com.crittercism.dexmaker:dexmaker-mockito:1.4'
-    androidTestCompile 'com.squareup.spoon:spoon-client:1.7.0'
-    androidTestCompile 'com.squareup.okhttp3:mockwebserver:3.5.0'
-    androidTestApt "com.google.dagger:dagger-compiler:${daggerVersion}"
-    testApt "com.google.dagger:dagger-compiler:${daggerVersion}"
-
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
-    provided 'javax.annotation:jsr250-api:1.0'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-
-    compile 'org.apache.commons:commons-collections4:4.1'
-}
-
-
-project.gradle.taskGraph.whenReady {
-    //FIXME this bleeding statement does not with gradle gradle:2.2.0-rc2. It is ok for now, to comment this out, as long jenkins is not building bleeding versions
-//    connectedPayGermanyCompatDebugAndroidTest {
-//        ignoreFailures isJenkins
-//    }
-//    connectedPayGermanyBleedingDebugAndroidTest {
-//        ignoreFailures isJenkins
+    /**
+     * uiautomator requires minSdkVersion=18. since the flag 'tools:overrideLibrary' isn't working properly we either
+     * have to increse minSdkVersion to 18 or have different flavor for testing this stuff or not use uiautomator at all
+     */
+//    androidTestCompile('com.android.support.test.uiautomator:uiautomator-v18:2.1.2') {
+//        exclude group: 'com.android.support', module: 'support-annotations'
+//        exclude module: 'support-annotations'
+//        exclude module: 'recyclerview-v7'
+//        exclude module: 'support-v4'
+//        exclude module: 'support-v7'
 //    }
 }
+
 
 // -------------
 def addVersionInformation(country, appVersionMajor, appVersionMinor, appVersionPatch) {
     File file = new File(rootProject.projectDir, "app/release_docs/release_notes_${country}.txt")
     file.delete();
     file.createNewFile();
+    String releaseType = System.getenv("RELEASE_TYPE")
+    if (releaseType.equals("Production")) {
+        file.append("------- RELEASE CANDIDATE -------\n");
+    } else if (releaseType.equals("Alpha") || releaseType.equals("Beta")) {
+        file.append("------- " + releaseType.toUpperCase() + " -------\n");
+    }
     file.append("${appVersionMajor}.${appVersionMinor}.${appVersionPatch}r${revision}")
-    if (System.getenv("BRANCH") != null) {
-        file.append("\nBranch: " + System.getenv("BRANCH"));
+    if (System.getenv("BRANCH_NAME") != null) {
+        file.append("\nBranch: " + System.getenv("BRANCH_NAME"));
     } else {
-        file.append("\nTRUNK");
+        file.append("\nUnknown branch");
     }
     if (System.getenv("JOB_NAME") != null) {
         file.append("\nJob: " + System.getenv("JOB_NAME"));
     } else {
         file.append("\nJob: <local gradle build>");
     }
+    file.append("\nsendExternalPartners: ${sendExternalPartners}");
     file.append("\nisBeta: ${isBeta}");
     file.append("\nisProduction: ${isProduction}");
     file.append("\n\nChangelog: " + System.getenv("CHANGELOG"));
-
-    println "Changelog added: " + System.getenv("CHANGELOG");
-    println "Changelog2 added: " + System.getProperty("CHANGELOG");
     return file;
+}
+
+//----------------------------Espresso permissions grant--------------------------------------
+android.applicationVariants.all { variant ->
+    def applicationId = variant.applicationId
+    def adb = android.getAdbExe().toString()
+    def variantName = variant.name.capitalize()
+    def grantPermissionTask = tasks.create("grant${variantName}Permissions") << {
+        "${adb} devices".execute().text.eachLine {
+            if (it.endsWith("device")) {
+                def device = it.split()[0]
+                println "Granting permissions on devices ${device}"
+                "${adb} -s ${device} shell pm grant ${applicationId} android.permission.ACCESS_FINE_LOCATION".execute()
+                "${adb} -s ${device} shell pm grant ${applicationId} android.permission.WRITE_EXTERNAL_STORAGE".execute()
+                "${adb} -s ${device} shell pm grant ${applicationId} android.permission.WAKE_LOCK".execute()
+            }
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------
 
-task buildDE(dependsOn: ['assemblePayGermanyCompatDebug', 'assemblePayGermanyCompatRelease',
-                         'lintPayGermanyCompatDebug', 'lintPayGermanyCompatRelease',
-                         ':core:lintGermanyDebug', ':pay:lintGermanyDebug',
-                         ':core:testGermanyDebugUnitTest', ':pay:testGermanyDebugUnitTest',
-                         'testPayGermanyCompatDebugUnitTest', 'testPayGermanyCompatReleaseUnitTest']) {
+task buildDE(dependsOn: ['assemblePayGermanyCompatDebug',
+                         'compilePayGermanyCompatDebugUnitTestSources',
+                         ':core:compileGermanyDebugUnitTestSources',
+                         ':pay:compileGermanyDebugUnitTestSources',
+                         'compilePayGermanyCompatDebugAndroidTestSources',
+                         ':core:compileGermanyDebugAndroidTestSources',
+                         'lintPayGermanyCompatDebug',
+                         ':core:lintGermanyDebug',
+                         ':pay:lintGermanyDebug',
+                         'testPayGermanyCompatDebugUnitTest',
+                         'testPayGermanyCompatDebugUnitTestCoverage',
+                         ':core:testGermanyDebugUnitTest',
+                         ':core:testGermanyDebugUnitTestCoverage',
+                         ':pay:testGermanyDebugUnitTest',
+                         ':pay:testGermanyDebugUnitTestCoverage',
+                         'assemblePayGermanyCompatRelease',
+                         'compilePayGermanyCompatReleaseUnitTestSources',
+                         ':core:compileGermanyReleaseUnitTestSources',
+                         ':pay:compileGermanyReleaseUnitTestSources',
+//                         'lintPayGermanyCompatRelease',
+//                         ':core:lintGermanyRelease',
+//                         ':pay:lintGermanyRelease',
+                         'testPayGermanyCompatReleaseUnitTest',
+                         'testPayGermanyCompatReleaseUnitTestCoverage',
+                         ':core:testGermanyReleaseUnitTest',
+                         ':core:testGermanyReleaseUnitTestCoverage',
+                         ':pay:testGermanyReleaseUnitTest',
+                         ':pay:testGermanyReleaseUnitTestCoverage']) {
     description = "For DE: Build, runs unit tests and lint check, assembles german debug and release version"
 }
 
 
-task buildIT(dependsOn: ['assembleNonpayItalyCompatDebug', 'assembleNonpayItalyCompatRelease',
-                         'lintNonpayItalyCompatDebug', 'lintNonpayItalyCompatRelease',
-                         ':core:lint', ':core:testItalyDebugUnitTest',
-                         'testNonpayItalyCompatDebugUnitTest', 'testNonpayItalyCompatReleaseUnitTest']) {
+task buildIT(dependsOn: ['assembleNonpayItalyCompatDebug',
+                         'compileNonpayItalyCompatDebugUnitTestSources',
+                         ':core:compileItalyDebugUnitTestSources',
+                         'compileNonpayItalyCompatDebugAndroidTestSources',
+                         ':core:compileItalyDebugAndroidTestSources',
+                         'lintNonpayItalyCompatDebug',
+                         ':core:lintItalyDebug',
+                         'testNonpayItalyCompatDebugUnitTest',
+                         'testNonpayItalyCompatDebugUnitTestCoverage',
+                         ':core:testItalyDebugUnitTest',
+                         ':core:testItalyDebugUnitTestCoverage',
+                         'assembleNonpayItalyCompatRelease',
+                         'compileNonpayItalyCompatReleaseUnitTestSources',
+                         ':core:compileItalyReleaseUnitTestSources',
+//                         'lintNonpayItalyCompatRelease',
+//                         ':core:lintItalyRelease',
+                         'testNonpayItalyCompatReleaseUnitTest',
+                         'testNonpayItalyCompatReleaseUnitTestCoverage',
+                         ':core:testItalyReleaseUnitTest',
+                         ':core:testItalyReleaseUnitTestCoverage']) {
     description = "For IT: Build, runs unit tests, instrumentation tests and lint check, assembles italian debug and release version"
 }
 
-task buildMX(dependsOn: ['assembleNonpayMexicoCompatDebug', 'assembleNonpayMexicoCompatRelease',
-                         'lintNonpayMexicoCompatDebug', 'lintNonpayMexicoCompatRelease',
-                         ':core:lint', ':core:testMexicoDebugUnitTest',
-                         'testNonpayMexicoCompatDebugUnitTest', 'testNonpayMexicoCompatReleaseUnitTest']) {
+task buildMX(dependsOn: ['assembleNonpayMexicoCompatDebug',
+                         'compileNonpayMexicoCompatDebugUnitTestSources',
+                         ':core:compileMexicoDebugUnitTestSources',
+                         'compileNonpayMexicoCompatDebugAndroidTestSources',
+                         ':core:compileMexicoDebugAndroidTestSources',
+                         'lintNonpayMexicoCompatDebug',
+                         ':core:lintMexicoDebug',
+                         'testNonpayMexicoCompatDebugUnitTest',
+                         'testNonpayMexicoCompatDebugUnitTestCoverage',
+                         ':core:testMexicoDebugUnitTest',
+                         ':core:testMexicoDebugUnitTestCoverage',
+                         'assembleNonpayMexicoCompatRelease',
+                         'compileNonpayMexicoCompatReleaseUnitTestSources',
+                         ':core:compileMexicoReleaseUnitTestSources',
+//                         'lintNonpayMexicoCompatRelease',
+//                         ':core:lintMexicoRelease',
+                         'testNonpayMexicoCompatReleaseUnitTest',
+                         'testNonpayMexicoCompatReleaseUnitTestCoverage',
+                         ':core:testMexicoReleaseUnitTest',
+                         ':core:testMexicoReleaseUnitTestCoverage']) {
     description = "For MX: Build, runs unit tests, instrumentation tests and lint check, assembles mexican debug and release version"
 }
 
-task buildUS(dependsOn: ['assembleNonpayUnitedStatesCompatDebug', 'assembleNonpayUnitedStatesCompatRelease',
-                         'lintNonpayUnitedStatesCompatDebug', 'lintNonpayUnitedStatesCompatRelease',
-                         ':core:lint', ':core:testUnitedStatesDebugUnitTest',
-                         'testNonpayUnitedStatesCompatDebugUnitTest', 'testNonpayUnitedStatesCompatReleaseUnitTest']) {
+task buildUS(dependsOn: ['assembleNonpayUnitedStatesCompatDebug',
+                         'compileNonpayUnitedStatesCompatDebugUnitTestSources',
+                         ':core:compileUnitedStatesDebugUnitTestSources',
+                         'compileNonpayUnitedStatesCompatDebugAndroidTestSources',
+                         ':core:compileUnitedStatesDebugAndroidTestSources',
+                         'lintNonpayUnitedStatesCompatDebug',
+                         ':core:lintUnitedStatesDebug',
+                         'testNonpayUnitedStatesCompatDebugUnitTest',
+                         'testNonpayUnitedStatesCompatDebugUnitTestCoverage',
+                         ':core:testUnitedStatesDebugUnitTest',
+                         ':core:testUnitedStatesDebugUnitTestCoverage',
+                         'assembleNonpayUnitedStatesCompatRelease',
+                         'compileNonpayUnitedStatesCompatReleaseUnitTestSources',
+                         ':core:compileUnitedStatesReleaseUnitTestSources',
+//                         'lintNonpayUnitedStatesCompatRelease',
+//                         ':core:lintUnitedStatesRelease',
+                         'testNonpayUnitedStatesCompatReleaseUnitTest',
+                         'testNonpayUnitedStatesCompatReleaseUnitTestCoverage',
+                         ':core:testUnitedStatesReleaseUnitTest',
+                         ':core:testUnitedStatesReleaseUnitTestCoverage']) {
     description = "For US: Build, runs unit tests, instrumentation tests and lint check, assembles mexican debug and release version"
 }
+
 
 task(info) << {
     logging.captureStandardOutput LogLevel.LIFECYCLE
     println ">>> I am " + (isJenkins ? "" : "NOT ") + "running on Jenkins and do " + (isProduction ? "" : "NOT ") + "create a production release <<<"
 }
 preBuild.dependsOn += info
-
-// copy the correct google-services.json to the app project root folder
-apply from: 'firebase/config-firebase.gradle'
-apply plugin: 'com.google.gms.google-services'

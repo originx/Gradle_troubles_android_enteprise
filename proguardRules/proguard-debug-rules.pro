@@ -18,11 +18,12 @@
 # Let us use our common logging infrastructure completely
 -keep class timber.log.Timber { *; }
 # Special overrides for Rx (we need hooks and blocking observables)
--keep class rx.plugins.RxJavaPlugins { *; }
+-keep class rx.plugins.** { *; }
 -keep class rx.Observable { *; }
 -keep class rx.observables.BlockingObservable { *; }
 
 # keep everything from our own namespace, since methods existant in production code can be stripped
 # out for release builds if they're only used for testing purposes
+-keep class de.companyname.** { *; }
 
 -keep class com.facebook.** { *; }

@@ -1,11 +1,3 @@
-*.iml
-.gradle
-/local.properties
-.idea
-.DS_Store
-build
-captures
-.externalNativeBuild
 # Built application files
 *.apk
 *.ap_
@@ -42,12 +34,18 @@ captures/
 
 # Intellij
 *.iml
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/libraries
+.idea
 
 # Keystore files
-*.jks
+/keystores/
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
+
+/captures
+/release_notes_DE.txt
+/release_notes_IT.txt
+/release_notes_MX.txt
+/release_notes_US.txt
+
+**/.DS_Store
