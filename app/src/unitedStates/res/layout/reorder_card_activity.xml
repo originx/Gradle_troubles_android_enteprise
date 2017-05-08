@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="de.companyname.app.ui.cardmanagment.ReorderCardViewModel" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/order_card_root"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/toolbar_default" android:id="@+id/toolbard_binding"/>
+
+            <de.companyname.core.ui.widget.companynameFontTextView
+                android:id="@+id/reorder_reason_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:text="test"
+                android:textSize="18sp"
+                tools:text="SELECT A REASON" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/black"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/reorder_radio_group"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:onCheckedChanged="@{viewModel::onRadioGroupChange}">
+
+                    <RadioButton
+                        android:id="@+id/reorder_radioButton1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="test" />
+
+                    <de.companyname.core.ui.widget.companynameFontTextView
+                        android:id="@+id/reorder_radioButton1_desc"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="32dp"
+                        android:text="test"
+                        android:visibility="gone"
+                        tools:visibility="gone" />
+
+                    <RadioButton
+                        android:id="@+id/reorder_radioButton2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="test" />
+
+                    <de.companyname.core.ui.widget.companynameFontTextView
+                        android:id="@+id/reorder_radioButton2_desc"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="32dp"
+                        android:text="test"
+                        android:visibility="gone"
+                        tools:visibility="gone" />
+                </RadioGroup>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </ScrollView>
+</layout>

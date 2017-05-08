@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:customAttrs="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+<android.support.v7.widget.Toolbar android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?attr/actionBarSize"
+    android:navigationIcon="@drawable/common_google_signin_btn_icon_dark"
+    tools:ignore="UnusedAttribute,RtlHardcoded">
+
+    <de.companyname.core.ui.widget.companynameFontTextView
+        android:id="@+id/toolbar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/white"
+        android:textSize="24dp" />
+
+</android.support.v7.widget.Toolbar>
+</layout>
