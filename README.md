@@ -13,6 +13,7 @@ To run please disable instant run
 
 (tl;dr; still there, if you want multidex on 2.4>= either wait for multidex support or patch the multidex yourself on test runner)
 - Multidex fails with gradle 2.4.0-alpha7 plugin while running tests
+https://issuetracker.google.com/issues/37324038
 https://issuetracker.google.com/issues/38173162
 
 
