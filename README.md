@@ -9,7 +9,9 @@ To run please disable instant run
 
 - Instant run does not run with this project last time i checked, please disable it
 
-# Partially open (tl;dr; still there, if you want multidex on 2.4>= either wait for multidex support or patch the multidex yourself on test runner)
+# Partially open:
+
+(tl;dr; still there, if you want multidex on 2.4>= either wait for multidex support or patch the multidex yourself on test runner)
 - Multidex fails with gradle 2.4.0-alpha7 plugin while running tests
 https://issuetracker.google.com/issues/38173162
 
