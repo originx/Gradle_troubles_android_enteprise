@@ -83,13 +83,13 @@ android {
     }
 
     lintOptions {
-        baseline file("lint/lint-baseline.xml")
+        //baseline file("lint/lint-baseline.xml")
         checkAllWarnings false
         warningsAsErrors false
         //disabling check until lint NPE is fixed
         //https://code.google.com/p/android/issues/detail?id=230238
         disable 'NewerVersionAvailable', 'LintBaseline'
-        abortOnError true
+        abortOnError false
     }
 
     //duplicate licences failes gradle build process @see https://code.google.com/p/android/issues/detail?id=61573#c14
