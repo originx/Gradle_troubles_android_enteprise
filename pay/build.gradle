@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.fernandocejas.frodo'
 apply from: '../jacoco-unit-tests.gradle'
 
@@ -127,5 +126,4 @@ dependencies {
     testCompile libraries.robolectricShadowsPlayServices
     testCompile libraries.robolectricShadowsHttpClient
     testCompile libraries.mockito
-    retrolambdaConfig libraries.retrolambda
 }

@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.fernandocejas.frodo'
 apply from: '../jacoco-unit-tests.gradle'
 
@@ -143,7 +142,6 @@ android {
 }
 
 dependencies {
-    retrolambdaConfig libraries.retrolambda
     annotationProcessor libraries.daggerCompiler
 
     compile libraries.supportV4
