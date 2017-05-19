@@ -11,8 +11,7 @@ buildscript {
     dependencies {
         classpath 'com.github.triplet.gradle:play-publisher:1.1.5'
         classpath 'com.android.tools.build:gradle:3.0.0-alpha1'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.1'
-        classpath 'me.tatarka:gradle-retrolambda:3.2.4'
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
         // workaround for <https://github.com/evant/gradle-retrolambda/issues/96>
         classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
         // keep out until https://github.com/android10/frodo/issues/9 is fixed
@@ -133,7 +132,6 @@ ext {
                     okhttp3                : '3.6.0',
                     playServices           : '10.2.1',
                     retrofit               : '2.2.0',
-                    retrolambda            : '2.1.0',
                     rxandroid2             : '2.0.1',
                     rxcupboard2            : '2.0',
                     rxjava2                : '2.0.8',
@@ -187,7 +185,6 @@ ext {
             retrofit                      : 'com.squareup.retrofit2:retrofit:' + versions.libs.retrofit,
             retrofitAdapterRxjava2        : 'com.squareup.retrofit2:adapter-rxjava2:' + versions.libs.retrofit,
             retrofitConverterGson         : 'com.squareup.retrofit2:converter-gson:' + versions.libs.retrofit,
-            retrolambda                   : 'net.orfjackal.retrolambda:retrolambda:' + versions.libs.retrolambda,
             rxandroid2                    : 'io.reactivex.rxjava2:rxandroid:' + versions.libs.rxandroid2,
             rxcupboard2                   : 'nl.2312:rxcupboard2:' + versions.libs.rxcupboard2,
             rxjava2                       : 'io.reactivex.rxjava2:rxjava:' + versions.libs.rxjava2,
