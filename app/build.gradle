@@ -167,7 +167,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.assemble.doLast {
-            def originZipAlignedApkFile = variant.outputs[0].outputFile;
+            //def originZipAlignedApkFile = variant.outputs[0].outputFile;
             def apiLevel = versions.android.minSdk;
             def FLAVOR_DIMENSION_SIZE = 3
             for (int i = 0; i < FLAVOR_DIMENSION_SIZE; i++) {
@@ -182,11 +182,11 @@ android {
                     + (isProduction.toBoolean() ? "prod_" : "")
                     + (isBeta.toBoolean() ? "beta_" : "")
                     + variant.mergedFlavor.versionName + "r${revision}.apk")
-            copy {
-                from "$originZipAlignedApkFile"
-                into "$originZipAlignedApkFile.parent"
-                rename("$originZipAlignedApkFile.name", "$renameZipAlignedApkFile")
-            }
+            //copy {
+            //    from "$originZipAlignedApkFile"
+            //    into "$originZipAlignedApkFile.parent"
+            //    rename("$originZipAlignedApkFile.name", "$renameZipAlignedApkFile")
+            //}
         }
     }
 
@@ -221,14 +221,8 @@ dependencies {
     annotationProcessor libraries.daggerCompiler
     annotationProcessor libraries.butterknifeCompiler
 
-    germanyCompile project(path: ':core', configuration: isProduction ? 'germanyLive' : 'germanyRelease')
-    payCompile project(path: ':pay', configuration: 'germanyRelease')
-
-    //build flags are not propagated to libs until following bug is fixed: https://code.google.com/p/android/issues/detail?id=52962
-    //that is the reason we use release / live build types to chain different build configs trought the build modules
-    italyCompile project(path: ':core', configuration: isProduction ? 'italyLive' : 'italyRelease')
-    mexicoCompile project(path: ':core', configuration: isProduction ? 'mexicoLive' : 'mexicoRelease')
-    unitedStatesCompile project(path: ':core', configuration: isProduction ? 'unitedStatesLive' : 'unitedStatesRelease')
+    implementation project(':core')
+    implementation project(':pay')
 
     debugCompile libraries.leakcanary
     releaseCompile libraries.leakcanaryNoOp

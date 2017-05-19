@@ -20,19 +20,6 @@ spoon {
     grantAllPermissions = true
 
 }
-// Adding a version number to the libs will result  in not propagating version number to tracking and debug screen
-//ext.payVersionMajor = 1 // at most 31
-//ext.payVersionMinor = 0 // at most 63
-//ext.payVersionPatch = 0 // at most 63
-//ext.payVersionBuild = 0 // at most 16383
-
-// we have 31 bits (unsigned) available, so that leaves us with
-// 2^5 for versionMajor (0-31),
-// 2^6 for versionMinor (0-63),
-// 2^6 for versionPatch (0-63) and the remaining bits (2^14) for
-// versionBuild (0-16383)
-//ext.payVersionCode = ext.payVersionMajor << 26 | ext.payVersionMinor << 20 | ext.payVersionPatch << 14 | ext.payVersionBuild;
-//ext.payVersionName = "${ext.payVersionMajor}.${ext.payVersionMinor}.${ext.payVersionPatch}"
 
 android {
 
@@ -73,8 +60,10 @@ android {
         }
     }
 
+    flavorDimensions "country"
     productFlavors {
         germany {
+            dimension "country"
             //noinspection GroovyAssignabilityCheck
             versionName appVersionNameDE
             //noinspection GroovyAssignabilityCheck
@@ -104,7 +93,7 @@ android {
 }
 
 dependencies {
-    compile project(path: ':core', configuration: isProduction ? 'germanyLive' : 'germanyRelease')
+    implementation project(':core')
 
     annotationProcessor libraries.daggerCompiler
     compile libraries.dagger

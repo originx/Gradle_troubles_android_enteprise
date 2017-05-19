@@ -26,21 +26,6 @@ buildscript {
     }
 }
 
-// Adding a version number to the libs will result  in not propagating version number to tracking and debug screen
-//ext.coreVersionMajor = 1 // at most 31
-//ext.coreVersionMinor = 0 // at most 63
-//ext.coreVersionPatch = 0 // at most 63
-//ext.coreVersionBuild = 0 // at most 16383
-
-// we have 31 bits (unsigned) available, so that leaves us with
-// 2^5 for versionMajor (0-31),
-// 2^6 for versionMinor (0-63),
-// 2^6 for versionPatch (0-63) and the remaining bits (2^14) for
-// versionBuild (0-16383)
-//ext.coreVersionCode = ext.coreVersionMajor << 26 | ext.coreVersionMinor << 20 | ext.coreVersionPatch << 14 | ext.coreVersionBuild;
-//ext.coreVersionName = "${ext.coreVersionMajor}.${ext.coreVersionMinor}.${ext.coreVersionPatch}"
-
-
 android {
     adbOptions {
         timeOutInMs 120 * 1000 // 120 seconds
@@ -98,8 +83,10 @@ android {
         }
     }
 
+    flavorDimensions "country"
     productFlavors {
         germany {
+            dimension "country"
             versionName appVersionNameDE
             versionCode appVersionCodeDE
             resValue "string", "default_environment_dev", "test2"
@@ -107,18 +94,21 @@ android {
             buildConfigField "String", "FLAVOR_COUNTRY_CODE", '"de"'
         }
         italy {
+            dimension "country"
             versionName appVersionNameIT
             versionCode appVersionCodeIT
             resValue "string", "default_environment_dev", "e1et"
             buildConfigField "String", "FLAVOR_COUNTRY_CODE", '"it"'
         }
         mexico {
+            dimension "country"
             versionName appVersionNameMX
             versionCode appVersionCodeMX
             resValue "string", "default_environment_dev", "e1et"
             buildConfigField "String", "FLAVOR_COUNTRY_CODE", '"mx"'
         }
         unitedStates {
+            dimension "country"
             versionName appVersionNameUS
             versionCode appVersionCodeUS
             resValue "string", "default_environment_dev", "e1et_us"
