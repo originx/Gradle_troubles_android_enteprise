@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.getkeepsafe.dexcount'
+//apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.fernandocejas.frodo'
 apply plugin: 'com.github.triplet.play'
 apply from: '../jacoco-unit-tests.gradle'
