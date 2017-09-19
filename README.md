@@ -1,15 +1,11 @@
 # multidex
 
-Example project which demonstrate espresso multidex issues
-And also instant run issues with gradle build scripts <-- disable instant run if you want to use Android studio with this
+Example project which shows enteprise/ish level build setup.
 
-To run please disable instant run
 
-# Open:
 
-- Instant run does not run with this project last time i checked, please disable it
 
-# Partially open:
+# Some issues:
 
 (tl;dr; still there, if you want multidex on 2.4>= either wait for multidex support or patch the multidex yourself on test runner)
 - Multidex fails with gradle 2.4.0-alpha7 plugin while running tests
