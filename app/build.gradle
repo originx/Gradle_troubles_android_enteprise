@@ -1,7 +1,4 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'com.getkeepsafe.dexcount'
-apply plugin: 'com.fernandocejas.frodo'
-apply plugin: 'com.github.triplet.play'
 apply from: '../jacoco-unit-tests.gradle'
 // --------------------------------------------------------------------------
 
@@ -220,7 +217,6 @@ dependencies {
     annotationProcessor libraries.butterknifeCompiler
 
     implementation project(':core')
-    implementation project(':pay')
 
     debugCompile libraries.leakcanary
     releaseCompile libraries.leakcanaryNoOp
@@ -249,7 +245,7 @@ dependencies {
     testCompile libraries.supportAnnotations
     testCompile libraries.leakcanaryNoOp
     testCompile libraries.junit
-    testCompile libraries.eventbus //FIXME Is this necessary? There is already a compile libraries.eventbus
+    testCompile libraries.eventbus
     testCompile libraries.robolectric
     testCompile libraries.robolectricShadowsCore
     testCompile libraries.robolectricShadowsSupportV4
@@ -261,11 +257,8 @@ dependencies {
     androidTestAnnotationProcessor libraries.daggerCompiler
     androidTestCompile libraries.supportAnnotations
     androidTestCompile libraries.dagger
-    androidTestCompile libraries.rxjava2 //FIXME Is this needed? It is already added in Core
-//    androidTestCompile(libraries.rxandroid) { //FIXME Is this needed? It is already added in Core
-//        exclude group: 'io.reactivex:rxjava', module: 'rxjava'
-//    }
-    androidTestCompile libraries.eventbus //FIXME Is this necessary? There is already a compile libraries.eventbus
+    androidTestCompile libraries.rxjava2
+    androidTestCompile libraries.eventbus
     androidTestCompile libraries.mockito
     androidTestCompile libraries.junit
     androidTestCompile libraries.dexmaker
@@ -282,7 +275,6 @@ dependencies {
         exclude module: 'support-v4'
         exclude module: 'support-v7'
         exclude group: 'com.google.code.findbugs'
-        // FIXME http://stackoverflow.com/questions/37347326/errorconflict-with-dependency-com-google-code-findbugsjsr305
     }
     // exclude a couple of more modules here because of <http://stackoverflow.com/questions/29216327> and
     // more specifically of <https://code.google.com/p/android-test-kit/issues/detail?id=139>
@@ -330,49 +322,9 @@ dependencies {
         exclude module: 'support-v4'
         exclude module: 'support-v7'
     }
-
-    /**
-     * uiautomator requires minSdkVersion=18. since the flag 'tools:overrideLibrary' isn't working properly we either
-     * have to increse minSdkVersion to 18 or have different flavor for testing this stuff or not use uiautomator at all
-     */
-//    androidTestCompile('com.android.support.test.uiautomator:uiautomator-v18:2.1.2') {
-//        exclude group: 'com.android.support', module: 'support-annotations'
-//        exclude module: 'support-annotations'
-//        exclude module: 'recyclerview-v7'
-//        exclude module: 'support-v4'
-//        exclude module: 'support-v7'
-//    }
 }
 
 
-// -------------
-def addVersionInformation(country, appVersionMajor, appVersionMinor, appVersionPatch) {
-    File file = new File(rootProject.projectDir, "app/release_docs/release_notes_${country}.txt")
-    file.delete();
-    file.createNewFile();
-    String releaseType = System.getenv("RELEASE_TYPE")
-    if (releaseType.equals("Production")) {
-        file.append("------- RELEASE CANDIDATE -------\n");
-    } else if (releaseType.equals("Alpha") || releaseType.equals("Beta")) {
-        file.append("------- " + releaseType.toUpperCase() + " -------\n");
-    }
-    file.append("${appVersionMajor}.${appVersionMinor}.${appVersionPatch}r${revision}")
-    if (System.getenv("BRANCH_NAME") != null) {
-        file.append("\nBranch: " + System.getenv("BRANCH_NAME"));
-    } else {
-        file.append("\nUnknown branch");
-    }
-    if (System.getenv("JOB_NAME") != null) {
-        file.append("\nJob: " + System.getenv("JOB_NAME"));
-    } else {
-        file.append("\nJob: <local gradle build>");
-    }
-    file.append("\nsendExternalPartners: ${sendExternalPartners}");
-    file.append("\nisBeta: ${isBeta}");
-    file.append("\nisProduction: ${isProduction}");
-    file.append("\n\nChangelog: " + System.getenv("CHANGELOG"));
-    return file;
-}
 
 //----------------------------Espresso permissions grant--------------------------------------
 android.applicationVariants.all { variant ->
@@ -391,110 +343,6 @@ android.applicationVariants.all { variant ->
         }
     }
 }
-
-// ------------------------------------------------------------------------------------------
-
-task buildDE(dependsOn: ['assemblePayGermanyCompatDebug',
-                         'compilePayGermanyCompatDebugUnitTestSources',
-                         ':core:compileGermanyDebugUnitTestSources',
-                         ':pay:compileGermanyDebugUnitTestSources',
-                         'compilePayGermanyCompatDebugAndroidTestSources',
-                         ':core:compileGermanyDebugAndroidTestSources',
-                         'lintPayGermanyCompatDebug',
-                         ':core:lintGermanyDebug',
-                         ':pay:lintGermanyDebug',
-                         'testPayGermanyCompatDebugUnitTest',
-                         'testPayGermanyCompatDebugUnitTestCoverage',
-                         ':core:testGermanyDebugUnitTest',
-                         ':core:testGermanyDebugUnitTestCoverage',
-                         ':pay:testGermanyDebugUnitTest',
-                         ':pay:testGermanyDebugUnitTestCoverage',
-                         'assemblePayGermanyCompatRelease',
-                         'compilePayGermanyCompatReleaseUnitTestSources',
-                         ':core:compileGermanyReleaseUnitTestSources',
-                         ':pay:compileGermanyReleaseUnitTestSources',
-//                         'lintPayGermanyCompatRelease',
-//                         ':core:lintGermanyRelease',
-//                         ':pay:lintGermanyRelease',
-                         'testPayGermanyCompatReleaseUnitTest',
-                         'testPayGermanyCompatReleaseUnitTestCoverage',
-                         ':core:testGermanyReleaseUnitTest',
-                         ':core:testGermanyReleaseUnitTestCoverage',
-                         ':pay:testGermanyReleaseUnitTest',
-                         ':pay:testGermanyReleaseUnitTestCoverage']) {
-    description = "For DE: Build, runs unit tests and lint check, assembles german debug and release version"
-}
-
-
-task buildIT(dependsOn: ['assembleNonpayItalyCompatDebug',
-                         'compileNonpayItalyCompatDebugUnitTestSources',
-                         ':core:compileItalyDebugUnitTestSources',
-                         'compileNonpayItalyCompatDebugAndroidTestSources',
-                         ':core:compileItalyDebugAndroidTestSources',
-                         'lintNonpayItalyCompatDebug',
-                         ':core:lintItalyDebug',
-                         'testNonpayItalyCompatDebugUnitTest',
-                         'testNonpayItalyCompatDebugUnitTestCoverage',
-                         ':core:testItalyDebugUnitTest',
-                         ':core:testItalyDebugUnitTestCoverage',
-                         'assembleNonpayItalyCompatRelease',
-                         'compileNonpayItalyCompatReleaseUnitTestSources',
-                         ':core:compileItalyReleaseUnitTestSources',
-//                         'lintNonpayItalyCompatRelease',
-//                         ':core:lintItalyRelease',
-                         'testNonpayItalyCompatReleaseUnitTest',
-                         'testNonpayItalyCompatReleaseUnitTestCoverage',
-                         ':core:testItalyReleaseUnitTest',
-                         ':core:testItalyReleaseUnitTestCoverage']) {
-    description = "For IT: Build, runs unit tests, instrumentation tests and lint check, assembles italian debug and release version"
-}
-
-task buildMX(dependsOn: ['assembleNonpayMexicoCompatDebug',
-                         'compileNonpayMexicoCompatDebugUnitTestSources',
-                         ':core:compileMexicoDebugUnitTestSources',
-                         'compileNonpayMexicoCompatDebugAndroidTestSources',
-                         ':core:compileMexicoDebugAndroidTestSources',
-                         'lintNonpayMexicoCompatDebug',
-                         ':core:lintMexicoDebug',
-                         'testNonpayMexicoCompatDebugUnitTest',
-                         'testNonpayMexicoCompatDebugUnitTestCoverage',
-                         ':core:testMexicoDebugUnitTest',
-                         ':core:testMexicoDebugUnitTestCoverage',
-                         'assembleNonpayMexicoCompatRelease',
-                         'compileNonpayMexicoCompatReleaseUnitTestSources',
-                         ':core:compileMexicoReleaseUnitTestSources',
-//                         'lintNonpayMexicoCompatRelease',
-//                         ':core:lintMexicoRelease',
-                         'testNonpayMexicoCompatReleaseUnitTest',
-                         'testNonpayMexicoCompatReleaseUnitTestCoverage',
-                         ':core:testMexicoReleaseUnitTest',
-                         ':core:testMexicoReleaseUnitTestCoverage']) {
-    description = "For MX: Build, runs unit tests, instrumentation tests and lint check, assembles mexican debug and release version"
-}
-
-task buildUS(dependsOn: ['assembleNonpayUnitedStatesCompatDebug',
-                         'compileNonpayUnitedStatesCompatDebugUnitTestSources',
-                         ':core:compileUnitedStatesDebugUnitTestSources',
-                         'compileNonpayUnitedStatesCompatDebugAndroidTestSources',
-                         ':core:compileUnitedStatesDebugAndroidTestSources',
-                         'lintNonpayUnitedStatesCompatDebug',
-                         ':core:lintUnitedStatesDebug',
-                         'testNonpayUnitedStatesCompatDebugUnitTest',
-                         'testNonpayUnitedStatesCompatDebugUnitTestCoverage',
-                         ':core:testUnitedStatesDebugUnitTest',
-                         ':core:testUnitedStatesDebugUnitTestCoverage',
-                         'assembleNonpayUnitedStatesCompatRelease',
-                         'compileNonpayUnitedStatesCompatReleaseUnitTestSources',
-                         ':core:compileUnitedStatesReleaseUnitTestSources',
-//                         'lintNonpayUnitedStatesCompatRelease',
-//                         ':core:lintUnitedStatesRelease',
-                         'testNonpayUnitedStatesCompatReleaseUnitTest',
-                         'testNonpayUnitedStatesCompatReleaseUnitTestCoverage',
-                         ':core:testUnitedStatesReleaseUnitTest',
-                         ':core:testUnitedStatesReleaseUnitTestCoverage']) {
-    description = "For US: Build, runs unit tests, instrumentation tests and lint check, assembles mexican debug and release version"
-}
-
 
 task(info) << {
     logging.captureStandardOutput LogLevel.LIFECYCLE

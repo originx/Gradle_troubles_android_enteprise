@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.fernandocejas.frodo'
 apply from: '../jacoco-unit-tests.gradle'
 
 
@@ -16,13 +15,6 @@ spoon {
     codeCoverage = false
     // To grant permissions to Android M >= devices */
     grantAllPermissions = true
-}
-
-buildscript {
-    repositories {
-        jcenter()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    }
 }
 
 android {
@@ -61,7 +53,6 @@ android {
 
     dexOptions {
         jumboMode true
-        preDexLibraries preDexEnabled
         javaMaxHeapSize "4g"
     }
 
@@ -69,16 +60,13 @@ android {
         debug {
             minifyEnabled false
             testCoverageEnabled false //debugTestCoverageEnabled
-            buildConfigField "String", "FIREBASE_KEY_DEBUG_SCREEN", "\"asdfsafsafdsafdasfadsfasdfdasfasdf\"; //only available for non production builds"
         }
         release {
             minifyEnabled false
-            buildConfigField "String", "FIREBASE_KEY_DEBUG_SCREEN", "\"asdfsafsafdsafdasfadsfasdfdasfasdf\"; //only available for non production builds"
         }
         live {
             initWith(buildTypes.release)
             buildConfigField "boolean", "PROD_ENABLED", "true"
-            buildConfigField "String", "FIREBASE_KEY_DEBUG_SCREEN", "\"\"; //not available in production builds"
         }
     }
 
