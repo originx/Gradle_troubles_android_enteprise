@@ -1,91 +1,54 @@
+apply plugin: 'org.sonarqube'
 // Top-level build file where you can add configuration options common to all sub-projects/modules
 buildscript {
+    ext.kotlin_version = '1.2.0'
     repositories {
-        jcenter()
-        maven {
-            url 'https://maven.google.com'
-        }
+        mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         google()
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-beta6'
-        // keep out until https://github.com/android10/frodo/issues/9 is fixed
-        //instrumentation paralelization runner
-        classpath 'com.stanfy.spoon:spoon-gradle-plugin:1.2.2'
-        classpath 'com.squareup.spoon:spoon-runner:1.7.1'
+        classpath 'com.google.gms:google-services:3.1.2'
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+        classpath "gradle.plugin.org.jlleitschuh.gradle:ktlint-gradle:2.3.0"
     }
+    // use our modified version above.
     configurations {
-        androidTestCompile.exclude group: 'com.android.support', module: 'support-v4'
+        androidTestImplementation.exclude group: 'com.android.support', module: 'support-v4'
     }
+
 }
 
 ext {
-    //fixme libs - the debug screens use the VERSION_NAME and VERSION_CODE data from their
-    // BuildConfig, not the app's one, so right now we need this setup and have to refactor these informational
-    // screens as well
-    //
-    //
-    // The current app's version code uses a different versioncode scheme and is currently ~1,5 * 10^8,
-    // but currently only raises the patch part. So to make our app an "upgrade" with the new numbering scheme,
-    // we should at least start with appVersionMajor = 3 (~2,0 * 10^8)
-    appVersionMajorDE = 5 // at most 15
-    appVersionMinorDE = 9 // at most 63
-    appVersionPatchDE = 0 // at most 127
-    appVersionBuildDE = 0 // at most 16383
-
-    appVersionMajorIT = 2 // at most 15
-    appVersionMinorIT = 5 // at most 63
-    appVersionPatchIT = 0 // at most 127
-    appVersionBuildIT = 0 // at most 16383
-
-    appVersionMajorMX = 3 // at most 15
-    appVersionMinorMX = 5 // at most 63
-    appVersionPatchMX = 0 // at most 127
-    appVersionBuildMX = 0 // at most 16383
-
-
-    appVersionMajorUS = 1 // at most 15
-    appVersionMinorUS = 0 // at most 63
-    appVersionPatchUS = 0 // at most 127
-    appVersionBuildUS = 0 // at most 16383
-
-    revision = getGitCommitHash();
-    versionRevision = getGitCommitCount();
+    revision = getGitCommitHash()
+    versionRevision = getGitCommitCount()
 
     logger.info("Revision ${revision}")
     logger.info("Version revision ${versionRevision}")
 
-    //change this to
-    // current version code de:  679477248
-    // current version code  it: 274726912
-    // current version code mx: 408944640
+    appVersionCode = getVersionCode(ext.versionRevision)
+    appVersionNameDE = "5.15.0"
+    appVersionNameIT = "2.13.0"
+    appVersionNameMX = "3.13.0"
+    appVersionNameUS = "3.4.0"
 
-    // 2100000000 maximum version code number
-    // base to be updatable: 680000000
-
-    appVersionCodeDE = appVersionCodeIT = appVersionCodeMX = appVersionCodeUS = getVersionCode(ext.versionRevision)
-    appVersionNameDE = getVersionName(appVersionMajorDE, appVersionMinorDE, appVersionPatchDE)
-    appVersionNameIT = getVersionName(appVersionMajorIT, appVersionMinorIT, appVersionPatchIT)
-    appVersionNameMX = getVersionName(appVersionMajorMX, appVersionMinorMX, appVersionPatchMX)
-    appVersionNameUS = getVersionName(appVersionMajorUS, appVersionMinorUS, appVersionPatchUS)
+    appVersionNameAT = "1.0.0"
 
     buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
     isJenkins = System.getenv("JENKINS_HOME") != null
-    preDexEnabled = "true".equals(System.getProperty("pre-dex", "true")) && !isJenkins
-
-    // a couple of settings that speed up local debug builds
-    debugOptimizations = project.hasProperty("debugOptimizations") ? debugOptimizations.toBoolean() : true
-    debugMinifyEnabled = isJenkins || !debugOptimizations
-    debugShrinkResourcesEnabled = isJenkins || !debugOptimizations
-    debugTestCoverageEnabled = isJenkins || !debugOptimizations
 
     // override this with -PsendExternalPartners=true to inform external-testers about new version
     sendExternalPartners = project.hasProperty("sendExternalPartners") ? sendExternalPartners.toBoolean() : false
     // override this with -PisProduction=true to create publishable release builds
     isProduction = project.hasProperty("isProduction") ? isProduction.toBoolean() : false
-    // override this with -PisBeta=true to enable debug screen in production build without enviroment switcher
+    // override this with -PisBeta=true to enable debug screen in production build without environment switcher
     isBeta = project.hasProperty("isBeta") ? isBeta.toBoolean() : false
     // override this with -PisProximityActivated=true to create publishable release builds
     isProximityActivated = project.hasProperty("isProximityActivated") ? isProximityActivated.toBoolean() : true
@@ -93,130 +56,82 @@ ext {
 
     versions = [
             android: [
-                    buildTools  : '26.0.1',
-                    compileSdk  : 26,
-                    javaVersion : JavaVersion.VERSION_1_8,
-                    minSdk      : 16,
-                    productNameMinSdk: 18,
-                    targetSdk   : 26
+                    buildTools : '26.0.2',
+                    compileSdk : 26,
+                    javaVersion: JavaVersion.VERSION_1_8,
+                    minSdk     : 16,
+                    targetSdk  : 26
             ],
             libs   : [
-                    androidanimations      : '1.1.3',
-                    butterknife            : '8.4.0',
-                    commonsCollections4    : '4.1',
-                    conceal                : '1.1.3',
-                    constraintLayout       : '1.0.2',
-                    cupboard               : '2.1.4',
-                    cupboardTools          : '0.2.0',
-                    dagger                 : '2.10',
-                    easing                 : '1.0.2',
-                    eventbus               : '2.4.0',
-                    firebase               : '10.2.1',
-                    frodo                  : '0.8.2',
-                    glide                  : '3.7.0',
-                    glideOkhttp3Integration: '1.4.0',
-                    gson                   : '2.8.0',
-                    joda                   : '2.9.3',
-                    jsr250                 : '1.0',
-                    leakcanary             : '1.4-beta2',
-                    libphonenumber         : '8.0.1',
-                    materialprogressbar    : '1.1.6',
-                    multidex               : '1.0.1',
-                    nineoldandroids        : '2.4.0',
-                    okhttp3                : '3.6.0',
-                    playServices           : '10.2.1',
-                    retrofit               : '2.2.0',
-                    rxandroid2             : '2.0.1',
-                    rxcupboard2            : '2.0',
-                    rxjava2                : '2.0.8',
-                    rxlifecycle            : '2.0.1',
-                    rxlifecycleComponents  : '2.0.1',
-                    support                : '26.0.2',
-                    timber                 : '4.3.1',
-                    validationKomensky     : '0.9.2',
-                    zxing                  : '3.3.0',
+                    adition                   : '25',
+                    adjust                    : '4.11.4',
+                    taptargetview             : '1.9.1',
+                    androidanimations         : '2.3',
+                    androidMapsUtils          : '0.5+',
+                    butterknife               : '8.8.1',
+                    checkstyle                : '8.4',
+                    commonsCollections4       : '4.1',
+                    conceal                   : '1.1.3',
+                    confetti                  : '1.1.0',
+                    constraintLayout          : '1.0.2',
+                    crashlytics               : '2.7.1',
+                    cupboard                  : '2.2.0',
+                    cupboardTools             : '0.3.1',
+                    sqlCipher                 : '3.5.7',
+                    dagger                    : '2.13',
+                    easing                    : '2.1',
+                    eventbus                  : '2.4.0',
+                    firebase                  : '11.6.0',
+                    glide                     : '4.3.1',
+                    gson                      : '2.8.2',
+                    joda                      : '2.9.9',
+                    jodaConvert               : '1.9.2',
+                    jsr250                    : '1.0',
+                    ktlint                    : '0.12.1',
+                    leakcanary                : '1.5.4',
+                    libphonenumber            : '8.8.5',
+                    materialprogressbar       : '1.4.2',
+                    multidex                  : '1.0.2',
+                    okhttp3                   : '3.9.0',
+                    omniture                  : '4.13.7',
+                    pageindicatorview         : '0.2.0',
+                    paybackProximity          : '1.43.0',
+                    playServices              : '11.6.0',
+                    retrofit                  : '2.3.0',
+                    rxandroid2                : '2.0.1',
+                    rxbinding                 : '2.0.0',
+                    rxcupboard2               : '2.0',
+                    rxjava2                   : '2.1.6',
+                    securePreferences         : '1.0',
+                    support                   : '27.0.1',
+                    androidArchitecture       : '1.0.0',
+                    androidArchitectureRuntime: '1.0.3',
+                    timber                    : '4.5.1',
+                    umtcore                   : '0.67',
+                    umtsdk                    : '0.67',
+                    umtnfc                    : '1.4',
+                    validationKomensky        : '0.9.2',
+                    zxing                     : '3.3.0',
 
                     // Only for test
-                    dexmaker               : '2.2.0',
-                    junit                  : '4.12',
-                    mockito                : '2.3.0',
-                    robolectric            : '3.2.2',
-                    robolectricShadows     : '3.1.4',
-                    spoon                  : '1.7.1',
+                    dexmaker                  : '2.2.0',
+                    junit                     : '4.12',
+                    mockito                   : '2.3.0',
+                    robolectric               : '3.4-rc3',
+                    robolectricShadows        : '3.4-rc3',
             ]
     ]
 
-    libraries = [
-            androidanimations             : 'com.daimajia.androidanimations:library:' + versions.libs.androidanimations + '@aar',
-            butterknife                   : 'com.jakewharton:butterknife:' + versions.libs.butterknife,
-            butterknifeCompiler           : 'com.jakewharton:butterknife-compiler:' + versions.libs.butterknife,
-            commonsCollections4           : 'org.apache.commons:commons-collections4:' + versions.libs.commonsCollections4,
-            conceal                       : 'com.facebook.conceal:conceal:' + versions.libs.conceal + '@aar',
-            cupboard                      : 'nl.qbusict:cupboard:' + versions.libs.cupboard,
-            cupboardTools                 : 'nl.littlerobots:cupboard-tools:' + versions.libs.cupboardTools,
-            dagger                        : 'com.google.dagger:dagger:' + versions.libs.dagger,
-            daggerCompiler                : 'com.google.dagger:dagger-compiler:' + versions.libs.dagger,
-            easing                        : 'com.daimajia.easing:library:' + versions.libs.easing + '@aar',
-            eventbus                      : 'de.greenrobot:eventbus:' + versions.libs.eventbus,
-            firebaseConfig                : 'com.google.firebase:firebase-config:' + versions.libs.firebase,
-            firebaseMessaging             : 'com.google.firebase:firebase-messaging:' + versions.libs.firebase,
-            frodo                         : 'com.fernandocejas.frodo:frodo-api:' + versions.libs.frodo,
-            glide                         : 'com.github.bumptech.glide:glide:' + versions.libs.glide,
-            glideOkhttp3Integration       : 'com.github.bumptech.glide:okhttp3-integration:' + versions.libs.glideOkhttp3Integration + '@aar',
-            gson                          : 'com.google.code.gson:gson:' + versions.libs.gson,
-            joda                          : 'net.danlew:android.joda:' + versions.libs.joda,
-            jsr250                        : 'javax.annotation:jsr250-api:' + versions.libs.jsr250,
-            leakcanary                    : 'com.squareup.leakcanary:leakcanary-android:' + versions.libs.leakcanary,
-            leakcanaryNoOp                : 'com.squareup.leakcanary:leakcanary-android-no-op:' + versions.libs.leakcanary,
-            libphonenumber                : 'com.googlecode.libphonenumber:libphonenumber:' + versions.libs.libphonenumber,
-            materialprogressbar           : 'me.zhanghai.android.materialprogressbar:library:' + versions.libs.materialprogressbar,
-            nineoldandroids               : 'com.nineoldandroids:library:' + versions.libs.nineoldandroids,
-            okhttp3                       : 'com.squareup.okhttp3:okhttp:' + versions.libs.okhttp3,
-            okhttp3LoggingInterceptor     : 'com.squareup.okhttp3:logging-interceptor:' + versions.libs.okhttp3,
-            okhttp3Mockwebserver          : 'com.squareup.okhttp3:mockwebserver:' + versions.libs.okhttp3,
-            playServicesAnalytics         : 'com.google.android.gms:play-services-analytics:' + versions.libs.playServices,
-            playServicesLocation          : 'com.google.android.gms:play-services-location:' + versions.libs.playServices,
-            retrofit                      : 'com.squareup.retrofit2:retrofit:' + versions.libs.retrofit,
-            retrofitAdapterRxjava2        : 'com.squareup.retrofit2:adapter-rxjava2:' + versions.libs.retrofit,
-            retrofitConverterGson         : 'com.squareup.retrofit2:converter-gson:' + versions.libs.retrofit,
-            rxandroid2                    : 'io.reactivex.rxjava2:rxandroid:' + versions.libs.rxandroid2,
-            rxcupboard2                   : 'nl.2312:rxcupboard2:' + versions.libs.rxcupboard2,
-            rxjava2                       : 'io.reactivex.rxjava2:rxjava:' + versions.libs.rxjava2,
-            rxlifecycle                   : 'com.trello.rxlifecycle2:rxlifecycle:' + versions.libs.rxlifecycle,
-            rxlifecycleComponents         : 'com.trello.rxlifecycle2:rxlifecycle-components:' + versions.libs.rxlifecycleComponents,
-            supportAnnotations            : 'com.android.support:support-annotations:' + versions.libs.support,
-            supportAppcompat              : 'com.android.support:appcompat-v7:' + versions.libs.support,
-            supportCardview               : 'com.android.support:cardview-v7:' + versions.libs.support,
-            supportConstraintLayout       : 'com.android.support.constraint:constraint-layout:' + versions.libs.constraintLayout,
-            supportGridlayout             : 'com.android.support:gridlayout-v7:' + versions.libs.support,
-            supportCustomtabs             : 'com.android.support:customtabs:' + versions.libs.support,
-            supportDesign                 : 'com.android.support:design:' + versions.libs.support,
-            supportMultidex               : 'com.android.support:multidex:' + versions.libs.multidex,
-            supportMultidexInstrumentation: 'com.android.support:multidex-instrumentation:' + versions.libs.multidex,
-            supportRecyclerview           : 'com.android.support:recyclerview-v7:' + versions.libs.support,
-            supportV4                     : 'com.android.support:support-v4:' + versions.libs.support,
-            timber                        : 'com.jakewharton.timber:timber:' + versions.libs.timber,
-            validationKomensky            : 'eu.inmite.android.lib:android-validation-komensky:' + versions.libs.validationKomensky,
-            zxing                         : 'com.google.zxing:core:' + versions.libs.zxing,
-            zxingAndroidIntegration       : 'com.google.zxing:android-integration:' + versions.libs.zxing,
-
-            // Only for test
-            dexmaker                      : 'com.linkedin.dexmaker:dexmaker:' + versions.libs.dexmaker,
-            dexmakerMockito               : 'com.linkedin.dexmaker:dexmaker-mockito:' + versions.libs.dexmaker,
-            junit                         : 'junit:junit:' + versions.libs.junit,
-            mockito                       : 'org.mockito:mockito-core:' + versions.libs.mockito,
-            robolectric                   : 'org.robolectric:robolectric:' + versions.libs.robolectric,
-            robolectricShadowsCore        : 'org.robolectric:shadows-core-v22:' + versions.libs.robolectricShadows,
-            robolectricShadowsHttpClient  : 'org.robolectric:shadows-httpclient:' + versions.libs.robolectric,
-            robolectricShadowsMultidex    : 'org.robolectric:shadows-multidex:' + versions.libs.robolectric,
-            robolectricShadowsPlayServices: 'org.robolectric:shadows-play-services:' + versions.libs.robolectric,
-            robolectricShadowsSupportV4   : 'org.robolectric:shadows-support-v4:' + versions.libs.robolectric,
-            spoon                         : 'com.squareup.spoon:spoon-client:' + versions.libs.spoon,
-    ]
-
+    configurations.all {
+        resolutionStrategy {
+            force "com.android.support:support-annotations:" + versions.libs.support,
+                    "com.android.support:appcompat-v7:" + versions.libs.support,
+                    "com.android.support:support-v4:" + versions.libs.support
+        }
+    }
 }
 allprojects {
-    // prevent evil gradle children fork proceses spawns from stealing focus
+    // prevent evil gradle children fork processes spawns from stealing focus
     tasks.withType(JavaForkOptions) {
         // Forked processes like GradleWorkerMain for tests won't steal focus!
         jvmArgs '-Djava.awt.headless=true'
@@ -224,7 +139,6 @@ allprojects {
 
     repositories {
         jcenter()
-        maven { url 'https://maven.google.com' }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         google()
     }
@@ -239,26 +153,34 @@ allprojects {
     }
 }
 
-private def getGitCommitCount() {
+subprojects {
+    tasks.withType(Test).all {
+        ignoreFailures isJenkins
+        systemProperty "run-under-test", "true"
+    }
+}
+
+private static def getGitCommitCount() {
     try {
         return 'git rev-list --first-parent --count HEAD'.execute().text.trim() as Integer
     }
     catch (ignored) {
-        return 0;
+        return 0
     }
 }
 
-private def getGitCommitHash() {
+private static def getGitCommitHash() {
     try {
         return 'git rev-parse --short HEAD'.execute().text.trim()
     }
     catch (ignored) {
-        return null;
+        return null
     }
 }
 
-private def getVersionCode(rev) {
-    return 680040000 + rev;
+private static def getVersionCode(rev) {
+    //magic number bcs it was mistakenly changed to max code of DE and applied to all countries now we use it everywhere
+    return 680040000 + rev
 }
 
 private def getVersionName(appVersionMajor, appVersionMinor, appVersionPatch) {

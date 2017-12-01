@@ -1,0 +1,62 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+kapt {
+    correctErrorTypes = true
+}
+android {
+    compileSdkVersion versions.android.compileSdk
+    buildToolsVersion versions.android.buildTools
+
+    defaultConfig {
+        minSdkVersion versions.android.minSdk
+        targetSdkVersion versions.android.targetSdk
+        versionCode 1
+        versionName project.hasProperty("MIVersion") ? MIVersion : "1.0.0"
+        project.archivesBaseName = "PaybackCore"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    lintOptions {
+        checkAllWarnings false
+        warningsAsErrors false
+        //disabling check until lint NPE is fixed
+        //https://code.google.com/p/android/issues/detail?id=230238
+        disable 'NewerVersionAvailable', 'LintBaseline'
+        abortOnError true
+    }
+}
+
+dependencies {
+    kapt "com.google.dagger:dagger-compiler:${versions.libs.dagger}"
+    api "com.google.dagger:dagger:${versions.libs.dagger}"
+    implementation "com.android.support:appcompat-v7:${versions.libs.support}"
+    api "net.danlew:android.joda:${versions.libs.joda}"
+    api "org.joda:joda-convert:${versions.libs.jodaConvert}"
+    //noinspection GradleDependency
+    api "com.facebook.conceal:conceal:${versions.libs.conceal}@aar"
+    api "com.crashlytics.sdk.android:crashlytics:${versions.libs.crashlytics}@aar"
+    api "nl.qbusict:cupboard:$versions.libs.cupboard"
+    api "nl.littlerobots.cupboard-tools:provider:$versions.libs.cupboardTools"
+    api "nl.littlerobots.cupboard-tools:gson:$versions.libs.cupboardTools"
+    api "nl.littlerobots.cupboard-tools:sqlcipher:$versions.libs.cupboardTools"
+    api "com.squareup.okhttp3:okhttp:${versions.libs.okhttp3}"
+    api "com.squareup.okhttp3:logging-interceptor:${versions.libs.okhttp3}"
+    api "com.squareup.retrofit2:retrofit:${versions.libs.retrofit}"
+    api "com.squareup.retrofit2:adapter-rxjava2:${versions.libs.retrofit}"
+    api "com.squareup.retrofit2:converter-gson:${versions.libs.retrofit}"
+    api "com.jakewharton.timber:timber:${versions.libs.timber}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    kapt 'com.android.databinding:compiler:3.0.1'
+
+
+}
+
+
