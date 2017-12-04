@@ -1,21 +1,8 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 apply from: '../jacoco-unit-tests.gradle'
-// --------------------------------------------------------------------------
-
-apply plugin: 'spoon'
-
-spoon {
-    adbTimeout = 120 // 120 seconds
-    if (project.hasProperty('spoonClassName')) {
-        className = project.spoonClassName
-    }
-    ignoreFailures = true
-    debug = true
-    noAnimations = false
-    codeCoverage = false
-    // To grant permissions to Android M >= devices */
-    grantAllPermissions = true
-}
 
 android {
     adbOptions {
@@ -26,7 +13,7 @@ android {
         targetCompatibility versions.android.javaVersion
     }
 
-    
+
 
     compileSdkVersion versions.android.compileSdk
     buildToolsVersion versions.android.buildTools
@@ -42,24 +29,13 @@ android {
         javaMaxHeapSize "4g"
         maxProcessCount = 8
     }
-
-    signingConfigs {
-        debug {
-            storePassword "android"
-            keyPassword "android"
-            keyAlias "androiddebugkey"
-        }
-    }
-
     defaultConfig {
-        applicationId "de.companyname.app.multidexfail"
-
-        if (isProduction) { //Override Appname for production builds, so this is NOT country specific anymore
-            resValue "string", "app_name_country", "companyname"
-        }
+        applicationId "de.payback.app.dsa"
+        versionCode appVersionCode
 
         minSdkVersion versions.android.minSdk
         targetSdkVersion versions.android.targetSdk
+        vectorDrawables.useSupportLibrary = true
 
         buildConfigField "String", "BUILD_REVISION", "\"${revision}\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
@@ -80,14 +56,14 @@ android {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-rules.pro', '../proguardRules/proguard-debug-rules.pro'
-            testProguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-rules.pro', '../proguardRules/proguard-debug-test-rules.pro'
+            testProguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-debug-test-rules.pro'
             testCoverageEnabled false
             multiDexKeepProguard file('../proguardRules/multidex-proguard.pro')
         }
         release {
             minifyEnabled true
             shrinkResources true
-            testProguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-rules.pro'
+            testProguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-debug-test-rules.pro'
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-rules.pro'
         }
     }
@@ -98,29 +74,31 @@ android {
 
     // not all product flavor combinations are valid, we're ignoring a couple, see below
     productFlavors {
-        /* Feature-Flags */
-        def PAY_START = "PAY_START"
-        // Have to override versionName here, since versionNameSuffix is not yet supported for flavors:
-        // https://code.google.com/p/android/issues/detail?id=59614
         pay {
             dimension 'pay'
         }
-        nonpay {
+        global {
             dimension 'pay'
         }
-        bleeding {
+        dev {
             dimension 'api'
             minSdkVersion 21
         }
         compat {
             dimension 'api'
         }
+        austria {
+            dimension 'country'
+            signingConfig signingConfigs.debug
+            applicationId "at.companyname.client.android"
+            versionName "AT"
+            resConfigs "at"
+        }
         germany {
             dimension 'country'
             signingConfig signingConfigs.debug
             applicationId "de.companyname.client.android"
-            buildConfigField "boolean", PAY_START, "true"
-            versionCode appVersionCodeDE
+            versionCode 1
             versionName appVersionNameDE
             resConfigs "de"
         }
@@ -128,7 +106,7 @@ android {
             dimension 'country'
             signingConfig signingConfigs.debug
             applicationId "it.companyname.client.android"
-            versionCode appVersionCodeIT
+            versionCode 1
             versionName appVersionNameIT
             resConfigs "it"
         }
@@ -136,15 +114,16 @@ android {
             dimension 'country'
             signingConfig signingConfigs.debug
             applicationId "mx.companyname.client.android"
-            versionCode appVersionCodeMX
+            versionCode 1
             versionName appVersionNameMX
             resConfigs "es"
         }
+
         unitedStates {
             dimension 'country'
             signingConfig signingConfigs.debug
             applicationId "com.companyname.productName"
-            versionCode appVersionCodeUS
+            versionCode 1
             versionName appVersionNameUS
             minSdkVersion versions.android.productNameMinSdk
             resConfigs "en"
@@ -152,37 +131,31 @@ android {
     }
 
     lintOptions {
-        baseline file("lint/lint-baseline.xml")
         checkAllWarnings false
         warningsAsErrors false
-        //disabling check until lint NPE is fixed
-        //https://code.google.com/p/android/issues/detail?id=230238
-        disable 'NewerVersionAvailable', 'LintBaseline'
+        checkReleaseBuilds false
+        disable 'LogNotTimber', 'StringFormatInTimber', 'ThrowableNotAtBeginning', 'BinaryOperationInTimber', 'TimberArgCount', 'TimberArgTypes', 'TimberTagLength'
         abortOnError true
     }
 
     applicationVariants.all { variant ->
-        variant.assemble.doLast {
-            //def originZipAlignedApkFile = variant.outputs[0].outputFile;
-            def apiLevel = versions.android.minSdk;
+        variant.outputs.all {
+            def apiLevel = versions.android.minSdk
             def FLAVOR_DIMENSION_SIZE = 3
             for (int i = 0; i < FLAVOR_DIMENSION_SIZE; i++) {
-                if (variant.productFlavors[i].minSdkVersion != null) {
+                if (variant.productFlavors.get(i).minSdkVersion != null) {
                     apiLevel = variant.productFlavors[i].minSdkVersion.apiLevel
                 }
             }
-            def renameZipAlignedApkFile = ("companyname_" + variant.productFlavors[0].name + "_"
-                    + variant.productFlavors[1].name + "_"
+            outputFileName = ("PAYBACK_" + variant.productFlavors.get(0).name + "_"
+                    + variant.productFlavors.get(1).name + "_"
                     + "api" + apiLevel + "_"
                     + variant.buildType.name + "_"
                     + (isProduction.toBoolean() ? "prod_" : "")
                     + (isBeta.toBoolean() ? "beta_" : "")
-                    + variant.mergedFlavor.versionName + "r${revision}.apk")
-            //copy {
-            //    from "$originZipAlignedApkFile"
-            //    into "$originZipAlignedApkFile.parent"
-            //    rename("$originZipAlignedApkFile.name", "$renameZipAlignedApkFile")
-            //}
+                    + variant.mergedFlavor.versionName + "-"
+                    + variant.mergedFlavor.versionCode + "-"
+                    + "${revision}.apk")
         }
     }
 
@@ -199,13 +172,14 @@ android {
     }
 
     packagingOptions {
+        exclude "META-INF/MANIFEST.MF"
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
         exclude 'LICENSE.txt'
         exclude '.readme'
         exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
         exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
-        exclude 'META-INF/rxjava.properties'
+        exclude 'META-INF/rxjava.properties' //https://github.com/ReactiveX/RxJava/issues/4445
     }
 
 }
@@ -213,118 +187,213 @@ android {
 // ------------------------------------------------------------------------------------------
 
 dependencies {
-    annotationProcessor libraries.daggerCompiler
-    annotationProcessor libraries.butterknifeCompiler
+    kapt "com.github.bumptech.glide:compiler:${versions.libs.glide}"
 
-    implementation project(':core')
+    kapt "com.jakewharton:butterknife-compiler:${versions.libs.butterknife}"
+    kapt "android.arch.lifecycle:compiler:${versions.libs.androidArchitecture}"
+    implementation "com.google.dagger:dagger-android-support:${versions.libs.dagger}"
+    kapt "com.google.dagger:dagger-compiler:${versions.libs.dagger}"
+    kapt "com.google.dagger:dagger-android-processor:${versions.libs.dagger}"
+    implementation project(':Core')
 
-    debugCompile libraries.leakcanary
-    releaseCompile libraries.leakcanaryNoOp
-
-    compile libraries.supportAppcompat
-    compile libraries.supportAnnotations
-    compile libraries.supportAnnotations
-    compile libraries.supportRecyclerview
-    compile libraries.supportCardview
-    compile libraries.supportDesign
-    compile libraries.supportMultidex
-    // do not remove from app.gradle or firebase will crash when receiving messages
-    compile libraries.playServicesLocation
-    compile libraries.dagger
-    provided libraries.jsr250
-    compile libraries.eventbus
-    compile libraries.butterknife
-    compile libraries.commonsCollections4
-    compile libraries.libphonenumber
-    compile(libraries.validationKomensky) {
+    germanyImplementation "nl.littlerobots.cupboard-tools:sqlcipher:${versions.libs.cupboardTools}"
+    //noinspection GradleDependency
+    germanyImplementation "net.zetetic:android-database-sqlcipher:${versions.libs.sqlCipher}@aar"
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:${versions.libs.leakcanary}"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${versions.libs.leakcanary}"
+    //support and android system libs
+    // FIXME https://code.google.com/p/android/issues/detail?id=229676
+    // for all countries
+    implementation "com.google.firebase:firebase-config:${versions.libs.playServices}"
+    implementation "com.google.firebase:firebase-messaging:${versions.libs.playServices}"
+    implementation "com.google.android.gms:play-services-location:${versions.libs.playServices}"
+    implementation("com.google.android.gms:play-services-analytics:${versions.libs.playServices}") { //FIXME Is this exclude still needed?
+        // still links to 22.0
+        exclude group: "com.android.support"
+    }
+    implementation "com.android.support:support-v4:${versions.libs.support}"
+    implementation "com.android.support:design:${versions.libs.support}"
+    implementation "com.android.support:customtabs:${versions.libs.support}"
+    implementation "com.android.support:appcompat-v7:${versions.libs.support}"
+    implementation "com.getkeepsafe.taptargetview:taptargetview:${versions.libs.taptargetview}"
+    implementation "com.android.support:support-annotations:${versions.libs.support}"
+    implementation "com.android.support:gridlayout-v7:${versions.libs.support}"
+    implementation "android.arch.lifecycle:runtime:${versions.libs.androidArchitectureRuntime}"
+    implementation "android.arch.lifecycle:extensions:${versions.libs.androidArchitecture}"
+    implementation "com.android.support:recyclerview-v7:${versions.libs.support}"
+    implementation "com.android.support:cardview-v7:${versions.libs.support}"
+    implementation "com.android.support:multidex:${versions.libs.multidex}"
+    implementation "com.android.support.constraint:constraint-layout:${versions.libs.constraintLayout}"
+    implementation "com.google.android.gms:play-services-location:${versions.libs.playServices}"
+    implementation "com.google.android.gms:play-services-maps:${versions.libs.playServices}"
+    implementation "com.google.maps.android:android-maps-utils:${versions.libs.androidMapsUtils}"
+    //architecture
+    implementation "io.reactivex.rxjava2:rxjava:${versions.libs.rxjava2}"
+    implementation "io.reactivex.rxjava2:rxandroid:${versions.libs.rxandroid2}"
+    implementation "com.jakewharton.rxbinding2:rxbinding:${versions.libs.rxbinding}"
+    implementation "net.danlew:android.joda:${versions.libs.joda}"
+    implementation "org.joda:joda-convert:${versions.libs.jodaConvert}"
+    implementation "de.greenrobot:eventbus:${versions.libs.eventbus}"
+    implementation "com.jakewharton:butterknife:${versions.libs.butterknife}"
+    implementation("com.crashlytics.sdk.android:crashlytics:${versions.libs.crashlytics}@aar") {
+        transitive = true
+    }
+    compile('com.crashlytics.sdk.android:answers:1.4.1@aar') {
+        transitive = true
+    }
+    implementation "com.squareup.retrofit2:retrofit:${versions.libs.retrofit}"
+    implementation "com.squareup.retrofit2:converter-gson:${versions.libs.retrofit}"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:${versions.libs.retrofit}"
+    implementation "nl.2312:rxcupboard2:${versions.libs.rxcupboard2}"
+    implementation "com.google.code.gson:gson:${versions.libs.gson}"
+    implementation "com.squareup.okhttp3:okhttp:${versions.libs.okhttp3}"
+    implementation "com.squareup.okhttp3:logging-interceptor:${versions.libs.okhttp3}"
+    //noinspection GradleDependency
+    implementation "com.facebook.conceal:conceal:${versions.libs.conceal}@aar"
+    implementation "de.greenrobot:eventbus:${versions.libs.eventbus}"
+    implementation "com.google.zxing:core:${versions.libs.zxing}"
+    implementation "com.google.zxing:android-integration:${versions.libs.zxing}"
+    implementation "com.jakewharton.timber:timber:${versions.libs.timber}"
+    implementation "com.github.bumptech.glide:glide:${versions.libs.glide}"
+    implementation "com.github.bumptech.glide:okhttp3-integration:${versions.libs.glide}@aar"
+    implementation "nl.qbusict:cupboard:${versions.libs.cupboard}"
+    implementation "nl.littlerobots.cupboard-tools:gson:${versions.libs.cupboardTools}"
+    implementation "nl.littlerobots.cupboard-tools:provider:${versions.libs.cupboardTools}"
+    implementation "com.github.jinatonic.confetti:confetti:${versions.libs.confetti}"
+    implementation "nl.2312:rxcupboard2:${versions.libs.rxcupboard2}"
+    implementation "com.googlecode.libphonenumber:libphonenumber:${versions.libs.libphonenumber}"
+    implementation "org.apache.commons:commons-collections4:${versions.libs.commonsCollections4}"
+    //UI helper libs
+    implementation "com.romandanylyk:pageindicatorview:${versions.libs.pageindicatorview}@aar"
+    implementation("eu.inmite.android.lib:android-validation-komensky:${versions.libs.validationKomensky}") {
         exclude group: 'com.google.android', module: 'support-v4'
     }
 
+    //todo deprecated remove/open mob ticket
+    implementation("eu.inmite.android.lib:android-validation-komensky:${versions.libs.validationKomensky}") {
+        exclude group: 'com.google.android', module: 'support-v4'
+    }
+    implementation "com.daimajia.easing:library:${versions.libs.easing}@aar"
+    implementation "com.daimajia.androidanimations:library:${versions.libs.androidanimations}@aar"
+    implementation("me.zhanghai.android.materialprogressbar:library:${versions.libs.materialprogressbar}")
 
-    testAnnotationProcessor libraries.daggerCompiler
-    testCompile libraries.supportAnnotations
-    testCompile libraries.leakcanaryNoOp
-    testCompile libraries.junit
-    testCompile libraries.eventbus
-    testCompile libraries.robolectric
-    testCompile libraries.robolectricShadowsCore
-    testCompile libraries.robolectricShadowsSupportV4
-    testCompile libraries.robolectricShadowsMultidex
-    testCompile libraries.robolectricShadowsPlayServices
-    testCompile libraries.robolectricShadowsHttpClient
-    testCompile libraries.mockito
+    //unit test needed libraries
+    testImplementation "com.google.dagger:dagger-android-support:${versions.libs.dagger}"
+    kaptTest "com.google.dagger:dagger-compiler:${versions.libs.dagger}"
+    kaptTest "com.google.dagger:dagger-android-processor:${versions.libs.dagger}"
+    testImplementation "com.android.support:support-annotations:${versions.libs.support}"
+    testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${versions.libs.leakcanary}"
+    testImplementation "junit:junit:${versions.libs.junit}"
+    testImplementation "net.danlew:android.joda:${versions.libs.joda}"
+    testImplementation "joda-time:joda-time:${versions.libs.joda}"
+    testImplementation "org.joda:joda-convert:${versions.libs.jodaConvert}"
+    testImplementation "de.greenrobot:eventbus:${versions.libs.eventbus}"
+    testImplementation "org.robolectric:robolectric:${versions.libs.robolectric}"
+    testImplementation "org.robolectric:framework:${versions.libs.robolectricShadows}"
+    testImplementation "org.robolectric:supportv4:${versions.libs.robolectric}"
+    testImplementation "org.robolectric:multidex:${versions.libs.robolectric}"
+    testImplementation "org.robolectric:playservices:${versions.libs.robolectric}"
+    testImplementation "org.robolectric:httpclient:${versions.libs.robolectric}"
+    testImplementation "org.mockito:mockito-core:${versions.libs.mockito}"
+    testGermanyImplementation "nl.littlerobots.cupboard-tools:sqlcipher:${versions.libs.cupboardTools}"
+    //noinspection GradleDependency
+    testGermanyImplementation "net.zetetic:android-database-sqlcipher:${versions.libs.sqlCipher}@aar"
+    //espresso test needed libraries
+    androidTestImplementation "com.android.support:multidex-instrumentation:${versions.libs.multidex}"
+    androidTestImplementation "com.google.dagger:dagger:${versions.libs.dagger}"
+    androidTestImplementation "com.google.dagger:dagger-android-support:${versions.libs.dagger}"
+    kaptAndroidTest "com.google.dagger:dagger-compiler:${versions.libs.dagger}"
+    kaptAndroidTest "com.google.dagger:dagger-android-processor:${versions.libs.dagger}"
+    androidTestImplementation "io.reactivex.rxjava2:rxjava:${versions.libs.rxjava2}"
+    androidTestImplementation "io.reactivex.rxjava2:rxandroid:${versions.libs.rxandroid2}"
+    androidTestGermanyImplementation "nl.littlerobots.cupboard-tools:sqlcipher:${versions.libs.cupboardTools}"
+    //noinspection GradleDependency
+    androidTestGermanyImplementation "net.zetetic:android-database-sqlcipher:${versions.libs.sqlCipher}@aar"
+    androidTestImplementation "com.google.code.gson:gson:${versions.libs.gson}"
+    androidTestImplementation "junit:junit:${versions.libs.junit}"
+    androidTestImplementation "com.squareup.retrofit2:retrofit:${versions.libs.retrofit}"
+    androidTestImplementation "com.squareup.retrofit2:converter-gson:${versions.libs.retrofit}"
+    androidTestImplementation "com.squareup.retrofit2:adapter-rxjava2:${versions.libs.retrofit}"
+    androidTestImplementation "com.android.support:support-annotations:${versions.libs.support}"
+    androidTestImplementation "io.reactivex.rxjava2:rxjava:${versions.libs.rxjava2}"
+    androidTestImplementation "de.greenrobot:eventbus:${versions.libs.eventbus}"
+    androidTestImplementation "org.mockito:mockito-core:${versions.libs.mockito}"
+    androidTestImplementation "junit:junit:${versions.libs.junit}"
+    androidTestImplementation "com.linkedin.dexmaker:dexmaker:${versions.libs.dexmaker}"
+    androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:${versions.libs.dexmaker}"
+    androidTestImplementation "net.danlew:android.joda:${versions.libs.joda}"
+    androidTestImplementation "org.joda:joda-convert:${versions.libs.jodaConvert}"
+    androidTestImplementation "com.google.zxing:core:${versions.libs.zxing}"
+    androidTestImplementation "com.google.zxing:android-integration:${versions.libs.zxing}"
+    //noinspection GradleDependency
+    androidTestImplementation "com.facebook.conceal:conceal:${versions.libs.conceal}@aar"
+    androidTestImplementation "com.squareup.okhttp3:mockwebserver:${versions.libs.okhttp3}"
 
-    androidTestAnnotationProcessor libraries.daggerCompiler
-    androidTestCompile libraries.supportAnnotations
-    androidTestCompile libraries.dagger
-    androidTestCompile libraries.rxjava2
-    androidTestCompile libraries.eventbus
-    androidTestCompile libraries.mockito
-    androidTestCompile libraries.junit
-    androidTestCompile libraries.dexmaker
-    androidTestCompile libraries.dexmakerMockito
-    androidTestCompile libraries.spoon
-    androidTestCompile libraries.okhttp3Mockwebserver
-
-    // there is a conflict with the test support library (see http://stackoverflow.com/questions/29857695)
-    // so for now re exclude the support-annotations dependency from here to avoid clashes
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude module: 'support-annotations'
-        exclude module: 'recyclerview-v7'
-        exclude module: 'support-v4'
-        exclude module: 'support-v7'
-        exclude group: 'com.google.code.findbugs'
-    }
-    // exclude a couple of more modules here because of <http://stackoverflow.com/questions/29216327> and
-    // more specifically of <https://code.google.com/p/android-test-kit/issues/detail?id=139>
-    // otherwise you'll receive weird crashes on devices and dex exceptions on emulators
-    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2.2') {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude group: 'com.android.support', module: 'design'
-        exclude module: 'support-annotations'
-        exclude module: 'recyclerview-v7'
-        exclude module: 'support-v4'
-        exclude module: 'support-v7'
-        exclude group: 'com.google.code.findbugs'
-    }
-    //excluded specific packages due to https://code.google.com/p/android/issues/detail?id=183454 -.-´´
-    androidTestCompile('com.android.support.test.espresso:espresso-intents:2.2.2') {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude module: 'support-annotations'
-        exclude module: 'recyclerview-v7'
-        exclude module: 'support-v4'
-        exclude module: 'support-v7'
-        exclude group: 'com.google.code.findbugs'
-    }
-
-    androidTestCompile('com.android.support.test.espresso:espresso-web:2.2.2') {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude module: 'support-annotations'
-        exclude module: 'recyclerview-v7'
-        exclude module: 'support-v4'
-        exclude module: 'support-v7'
-        exclude group: 'com.google.code.findbugs'
-    }
-
-    androidTestCompile('com.android.support.test:runner:0.5') {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude module: 'support-annotations'
-        exclude module: 'recyclerview-v7'
-        exclude module: 'support-v4'
-        exclude module: 'support-v7'
-        exclude group: 'com.google.code.findbugs'
-    }
-    androidTestCompile('com.android.support.test:rules:0.5') {
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude module: 'support-annotations'
-        exclude module: 'recyclerview-v7'
-        exclude module: 'support-v4'
-        exclude module: 'support-v7'
-    }
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.1"
+    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:3.0.1"
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:3.0.1"
+    androidTestImplementation "com.android.support.test.espresso:espresso-web:3.0.1"
+    androidTestImplementation "com.android.support.test:runner:1.0.1"
+    androidTestImplementation "com.android.support.test:rules:1.0.1"
+    androidTestUtil "com.android.support.test:orchestrator:1.0.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    kapt 'com.android.databinding:compiler:3.0.1'
 }
 
+// -------------
+import org.gradle.internal.os.OperatingSystem
 
+def addVersionInformation(country, String appVersionName, int appVersionCode) {
+    File file = new File(rootProject.projectDir, "app/release_docs/release_notes_${country}.txt")
+    file.delete()
+    file.createNewFile()
+    String releaseType = System.getenv("RELEASE_TYPE")
+    if (sendExternalPartners.toBoolean()) {
+        file.append("--- PARTNERS RELEASE CANDIDATE ---\n")
+    } else if (releaseType.equals("Production")) {
+        file.append("--- RELEASE CANDIDATE ---\n")
+    } else if (releaseType.equals("Alpha") || releaseType.equals("Beta")) {
+        file.append("--- " + releaseType.toUpperCase() + " ---\n")
+    }
+    file.append("${appVersionName}-${appVersionCode}-${revision}")
+    file.append("\n")
+
+    if (!OperatingSystem.current().isWindows()) {
+        def p = ['/bin/bash', '-c', /git branch | grep -v "detached" | grep \* | cut -d ' ' -f2/].execute()
+        p.waitFor()
+        String branch = p.text.trim()
+        if (branch.isEmpty()) {
+            branch = System.getenv("BRANCH_NAME")
+        }
+        if (branch != null) {
+            file.append("\nBranch: " + branch)
+        } else {
+            file.append("\nUnknown branch")
+        }
+    }
+    if (System.getenv("JOB_NAME") != null) {
+        file.append("\nJob: " + System.getenv("JOB_NAME"))
+    } else {
+        file.append("\nJob: <local gradle build>")
+    }
+    if (System.getenv("BUILD_USER") != null && !isProduction) {
+        file.append("\nStarted by: " + System.getenv("BUILD_USER"))
+    }
+    file.append("\n")
+    file.append("\nsendExternalPartners: ${sendExternalPartners}")
+    file.append("\nisBeta: ${isBeta}")
+    file.append("\nisProduction: ${isProduction}")
+    file.append("\n")
+    file.append("\nProximity: ${versions.libs.paybackProximity}")
+    file.append("\nUMT Core: ${versions.libs.umtcore}")
+    file.append("\nUMT SDK: ${versions.libs.umtsdk}")
+    file.append("\nUMT NFC: ${versions.libs.umtnfc}")
+
+    if (System.getenv("CHANGELOG") != null) {
+        file.append("\n\nChangelog: " + System.getenv("CHANGELOG"))
+    }
+    return file
+}
 
 //----------------------------Espresso permissions grant--------------------------------------
 android.applicationVariants.all { variant ->
