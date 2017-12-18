@@ -42,7 +42,6 @@ dependencies {
     api "org.joda:joda-convert:${versions.libs.jodaConvert}"
     //noinspection GradleDependency
     api "com.facebook.conceal:conceal:${versions.libs.conceal}@aar"
-    api "com.crashlytics.sdk.android:crashlytics:${versions.libs.crashlytics}@aar"
     api "nl.qbusict:cupboard:$versions.libs.cupboard"
     api "nl.littlerobots.cupboard-tools:provider:$versions.libs.cupboardTools"
     api "nl.littlerobots.cupboard-tools:gson:$versions.libs.cupboardTools"
