@@ -30,7 +30,7 @@ android {
         maxProcessCount = 8
     }
     defaultConfig {
-        applicationId "de.companyname.app.multidexfail"
+        applicationId "firebase.trouble.setby.gradle"
         versionCode appVersionCode
 
         minSdkVersion versions.android.minSdk
@@ -50,7 +50,7 @@ android {
     buildTypes {
 
         debug {
-            applicationIdSuffix '.debug'
+//            applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
             signingConfig signingConfigs.debug
             minifyEnabled false
@@ -90,9 +90,11 @@ android {
         austria {
             dimension 'country'
             signingConfig signingConfigs.debug
-            applicationId "at.companyname.client.android"
+            applicationId "firebase.trouble.setby.gradle"
             versionName "AT"
             resConfigs "at"
+            //FIXME firebase google_app_id
+//            resValue "string", "google_app_id", "1:1093394223259:android:135c9bbacc945e22"
         }
         germany {
             dimension 'country'
@@ -101,32 +103,6 @@ android {
             versionCode 1
             versionName appVersionNameDE
             resConfigs "de"
-        }
-        italy {
-            dimension 'country'
-            signingConfig signingConfigs.debug
-            applicationId "it.companyname.client.android"
-            versionCode 1
-            versionName appVersionNameIT
-            resConfigs "it"
-        }
-        mexico {
-            dimension 'country'
-            signingConfig signingConfigs.debug
-            applicationId "mx.companyname.client.android"
-            versionCode 1
-            versionName appVersionNameMX
-            resConfigs "es"
-        }
-
-        unitedStates {
-            dimension 'country'
-            signingConfig signingConfigs.debug
-            applicationId "com.companyname.productName"
-            versionCode 1
-            versionName appVersionNameUS
-            minSdkVersion versions.android.productNameMinSdk
-            resConfigs "en"
         }
     }
 
