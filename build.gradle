@@ -1,7 +1,7 @@
 apply plugin: 'org.sonarqube'
 // Top-level build file where you can add configuration options common to all sub-projects/modules
 buildscript {
-    ext.kotlin_version = '1.2.0'
+    ext.kotlin_version = '1.2.10'
     repositories {
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
@@ -81,7 +81,7 @@ ext {
                     dagger                    : '2.13',
                     easing                    : '2.1',
                     eventbus                  : '2.4.0',
-                    firebase                  : '11.6.0',
+                    firebase                  : '11.8.0',
                     glide                     : '4.3.1',
                     gson                      : '2.8.2',
                     joda                      : '2.9.9',
@@ -95,15 +95,14 @@ ext {
                     okhttp3                   : '3.9.0',
                     omniture                  : '4.13.7',
                     pageindicatorview         : '0.2.0',
-                    paybackProximity          : '1.43.0',
-                    playServices              : '11.6.0',
+                    playServices              : '11.8.0',
                     retrofit                  : '2.3.0',
                     rxandroid2                : '2.0.1',
                     rxbinding                 : '2.0.0',
                     rxcupboard2               : '2.0',
                     rxjava2                   : '2.1.6',
                     securePreferences         : '1.0',
-                    support                   : '27.0.1',
+                    support                   : '27.0.2',
                     androidArchitecture       : '1.0.0',
                     androidArchitectureRuntime: '1.0.3',
                     timber                    : '4.5.1',

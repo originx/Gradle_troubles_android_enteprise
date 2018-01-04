@@ -30,7 +30,7 @@ android {
         maxProcessCount = 8
     }
     defaultConfig {
-        applicationId "de.payback.app.dsa"
+        applicationId "de.companyname.app.multidexfail"
         versionCode appVersionCode
 
         minSdkVersion versions.android.minSdk
@@ -147,7 +147,7 @@ android {
                     apiLevel = variant.productFlavors[i].minSdkVersion.apiLevel
                 }
             }
-            outputFileName = ("PAYBACK_" + variant.productFlavors.get(0).name + "_"
+            outputFileName = ("COMPANY_" + variant.productFlavors.get(0).name + "_"
                     + variant.productFlavors.get(1).name + "_"
                     + "api" + apiLevel + "_"
                     + variant.buildType.name + "_"
@@ -377,11 +377,6 @@ def addVersionInformation(country, String appVersionName, int appVersionCode) {
     file.append("\nsendExternalPartners: ${sendExternalPartners}")
     file.append("\nisBeta: ${isBeta}")
     file.append("\nisProduction: ${isProduction}")
-    file.append("\n")
-    file.append("\nProximity: ${versions.libs.paybackProximity}")
-    file.append("\nUMT Core: ${versions.libs.umtcore}")
-    file.append("\nUMT SDK: ${versions.libs.umtsdk}")
-    file.append("\nUMT NFC: ${versions.libs.umtnfc}")
 
     if (System.getenv("CHANGELOG") != null) {
         file.append("\n\nChangelog: " + System.getenv("CHANGELOG"))
