@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1093394223259",
+    "firebase_url": "https://db-demo-b395f.firebaseio.com",
+    "project_id": "db-demo-b395f",
+    "storage_bucket": "db-demo-b395f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1093394223259:android:135c9bbacc945e22",
+        "android_client_info": {
+          "package_name": "firebase.trouble.setby.gradle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1093394223259-5hua2dcgbql61m6ka3v7f538vhm4c7oh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATyo6Xmq2lFJpQ3LP9KJvlo_vZE-xGnEk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
