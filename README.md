@@ -8,7 +8,7 @@ Example project which shows an issue with Firebase read config and setup by code
 # open issue:
 
 We set Firebase config by code, and **not** by `google-services.json` 
-When we read config, it's successful, but config files *are not included*
+When we read config, it's successful, but config values *are not included*
 
 **This is our issue !**
 
