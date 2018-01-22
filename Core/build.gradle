@@ -15,7 +15,7 @@ android {
         targetSdkVersion versions.android.targetSdk
         versionCode 1
         versionName project.hasProperty("MIVersion") ? MIVersion : "1.0.0"
-        project.archivesBaseName = "PaybackCore"
+        project.archivesBaseName = "CompanyCore"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
