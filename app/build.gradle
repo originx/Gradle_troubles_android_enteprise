@@ -55,15 +55,14 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled false
             shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-rules.pro', '../proguardRules/proguard-debug-rules.pro'
-            testProguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-debug-test-rules.pro'
+            useProguard false
             testCoverageEnabled false
             multiDexKeepProguard file('../proguardRules/multidex-proguard.pro')
         }
         release {
             minifyEnabled true
             shrinkResources true
-            testProguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-debug-test-rules.pro'
+            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../proguardRules/proguard-rules.pro'
         }
     }
@@ -307,7 +306,6 @@ dependencies {
     androidTestImplementation "com.android.support.test:rules:1.0.1"
     androidTestUtil "com.android.support.test:orchestrator:1.0.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    kapt 'com.android.databinding:compiler:3.0.1'
 }
 
 // -------------

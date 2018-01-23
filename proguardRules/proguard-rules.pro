@@ -146,8 +146,6 @@ public void onEvent*(**);
 }
 
 
-
-
 -keep class android.os.LocaledList {
     java.util.Locale get(int);
 }
@@ -156,33 +154,6 @@ public void onEvent*(**);
 
 -dontwarn android.content.res.Configuration
 -dontnote android.content.res.Configuration
-
-#firebase or gms ?
--keep class com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor {
-    *;
-    <fields>;
-    public protected *;
-}
--dontnote  com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor
--dontwarn  com.google.android.gms.dynamite.descriptors.com.google.android.gms.flags.ModuleDescriptor
-
--keep class com.google.android.gms.dynamite.DynamiteModule$DynamiteLoaderClassLoader {
-    *;
-    <fields>;
-    public protected *;
-}
--dontnote  com.google.android.gms.dynamite.DynamiteModule$DynamiteLoaderClassLoader
--dontwarn  com.google.android.gms.dynamite.DynamiteModule$DynamiteLoaderClassLoader
-
-
--keep class com.google.android.gms.dynamite.DynamiteModule {
-    *;
-    <fields>;
-    public protected *;
-}
--dontnote  com.google.android.gms.dynamite.DynamiteModule
--dontwarn  com.google.android.gms.dynamite.DynamiteModule
-
 
 -keep class de.companyname.paylib.data.**{
 *;
@@ -371,12 +342,6 @@ public *;
 # Glide Module
 -keep public class * implements com.bumptech.glide.module.GlideModule
 
-# Google Play Services
-# Keep it up to date with [https://developers.google.com/android/guides/setup#Proguard]
--keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
-    public static final *** NULL;
-}
-
 -keepnames class * implements android.os.Parcelable
 -keepclassmembers class * implements android.os.Parcelable {
   public static final *** CREATOR;
@@ -391,20 +356,4 @@ public *;
   @android.support.annotation.Keep <methods>;
 }
 
--keep @interface com.google.android.gms.common.annotation.KeepName
--keepnames @com.google.android.gms.common.annotation.KeepName class *
--keepclassmembernames class * {
-  @com.google.android.gms.common.annotation.KeepName *;
-}
-
--keep @interface com.google.android.gms.common.util.DynamiteApi
--keep public @com.google.android.gms.common.util.DynamiteApi class * {
-  public <fields>;
-  public <methods>;
-}
-
 -dontwarn android.security.NetworkSecurityPolicy
-
-## http://stackoverflow.com/questions/18646899/proguard-cant-find-referenced-class-com-google-android-gms-r/24109609#24109609
--keep public class com.google.android.gms.* { public *; }
--dontwarn com.google.android.gms.**
