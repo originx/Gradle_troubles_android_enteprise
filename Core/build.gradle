@@ -52,10 +52,7 @@ dependencies {
     api "com.squareup.retrofit2:adapter-rxjava2:${versions.libs.retrofit}"
     api "com.squareup.retrofit2:converter-gson:${versions.libs.retrofit}"
     api "com.jakewharton.timber:timber:${versions.libs.timber}"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    kapt 'com.android.databinding:compiler:3.0.1'
-
-
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 

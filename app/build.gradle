@@ -299,15 +299,16 @@ dependencies {
     androidTestImplementation "com.facebook.conceal:conceal:${versions.libs.conceal}@aar"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:${versions.libs.okhttp3}"
 
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.1"
-    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:3.0.1"
-    androidTestImplementation "com.android.support.test.espresso:espresso-intents:3.0.1"
-    androidTestImplementation "com.android.support.test.espresso:espresso-web:3.0.1"
-    androidTestImplementation "com.android.support.test:runner:1.0.1"
-    androidTestImplementation "com.android.support.test:rules:1.0.1"
-    androidTestUtil "com.android.support.test:orchestrator:1.0.1"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    kapt 'com.android.databinding:compiler:3.1.1'
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
+    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:3.0.2"
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:3.0.2"
+    androidTestImplementation "com.android.support.test.espresso:espresso-web:3.0.2"
+    androidTestImplementation "com.android.support.test:runner:1.0.2"
+    androidTestImplementation "com.android.support.test:rules:1.0.2"
+    androidTestUtil "com.android.support.test:orchestrator:1.0.2"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    kapt 'com.android.databinding:compiler:3.1.2'
 }
 
 // -------------
