@@ -102,7 +102,7 @@ ext {
                     rxcupboard2               : '2.0',
                     rxjava2                   : '2.1.6',
                     securePreferences         : '1.0',
-                    support                   : '27.0.2',
+                    support                   : '27.1.1',
                     androidArchitecture       : '1.0.0',
                     androidArchitectureRuntime: '1.0.3',
                     timber                    : '4.7.0',
