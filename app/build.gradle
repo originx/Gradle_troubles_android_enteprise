@@ -180,13 +180,10 @@ dependencies {
     //support and android system libs
     // FIXME https://code.google.com/p/android/issues/detail?id=229676
     // for all countries
-    implementation "com.google.firebase:firebase-config:${versions.libs.playServices}"
-    implementation "com.google.firebase:firebase-messaging:${versions.libs.playServices}"
-    implementation "com.google.android.gms:play-services-location:${versions.libs.playServices}"
-    implementation("com.google.android.gms:play-services-analytics:${versions.libs.playServices}") { //FIXME Is this exclude still needed?
-        // still links to 22.0
-        exclude group: "com.android.support"
-    }
+    implementation "com.google.firebase:firebase-config:16.0.1"
+    implementation "com.google.firebase:firebase-messaging:17.3.3"
+    implementation "com.google.android.gms:play-services-location:16.0.0"
+    implementation 'com.google.firebase:firebase-core:16.0.4'
     implementation "com.android.support:support-v4:${versions.libs.support}"
     implementation "com.android.support:design:${versions.libs.support}"
     implementation "com.android.support:customtabs:${versions.libs.support}"
@@ -308,7 +305,6 @@ dependencies {
     androidTestUtil "com.android.support.test:orchestrator:1.0.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
-    kapt 'com.android.databinding:compiler:3.1.2'
 }
 
 // -------------
